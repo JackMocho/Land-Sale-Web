@@ -10,7 +10,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173', // Vite default port
+  origin: 'https://land-sale-frontend.onrender.com', // Vite default port
   credentials: true
 }));
 app.use(express.json({ limit: '20mb' })); // Increased payload limit for JSON
