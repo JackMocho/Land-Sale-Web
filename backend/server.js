@@ -8,10 +8,15 @@ dotenv.config();
 
 const app = express();
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://land-sale-frontend.onrender.com'
+];
+
 // Middleware
 app.use(cors({
-  origin: 'https://land-sale-frontend.onrender.com', // Vite default port
-  credentials: true
+  origin: allowedOrigins,
+  credentials: true,
 }));
 app.use(express.json({ limit: '20mb' })); // Increased payload limit for JSON
 app.use(express.urlencoded({ limit: '20mb', extended: true })); // Increased payload limit for urlencoded
