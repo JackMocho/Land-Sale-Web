@@ -254,3 +254,51 @@ exports.approveProperty = async (req, res) => {
     res.status(500).json({ message: 'Approval failed', error: error.message });
   }
 };
+
+// @desc    Get properties (admin or public with filters)
+// @route   GET /api/properties
+// @access  Public or Private (admin)
+exports.getProperties = async (req, res) => {
+  try {
+    let query = 'SELECT * FROM "Property"';
+    const params = [];
+    const conditions = [];
+
+    // Filter by approval
+    if (req.query.isApproved) {
+      conditions.push('"isApproved" = $' + (params.length + 1));
+      params.push(req.query.isApproved === 'true');
+    }
+    // Add more filters as needed...
+
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    const result = await pool.query(query, params);
+
+    // Parse images/documents for each property
+    const properties = result.rows.map(row => {
+      try {
+        row.images = row.images && typeof row.images === 'string'
+          ? JSON.parse(row.images)
+          : Array.isArray(row.images) ? row.images : [];
+      } catch {
+        row.images = [];
+      }
+      try {
+        row.documents = row.documents && typeof row.documents === 'string'
+          ? JSON.parse(row.documents)
+          : Array.isArray(row.documents) ? row.documents : [];
+      } catch {
+        row.documents = [];
+      }
+      return row;
+    });
+
+    res.json(properties);
+  } catch (err) {
+    console.error('getProperties error:', err);
+    res.status(500).json({ error: 'Failed to fetch properties' });
+  }
+};

@@ -31,6 +31,7 @@ app.use('/api/properties', require('./routes/propertyRoutes'));
 app.use('/api/inquiries', require('./routes/inquiryRoutes'));
 const statsRoutes = require('./routes/statsRoutes');
 app.use('/api', statsRoutes);
+
 // Test Route
 app.get('/api', (req, res) => {
   res.json({ status: 'ok', message: 'Land Sale API is running.' });

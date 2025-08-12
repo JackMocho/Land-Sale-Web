@@ -11,6 +11,7 @@ router.get('/stats', async (req, res) => {
       listings: parseInt(listingsRes.rows[0].count, 10)
     });
   } catch (err) {
+    console.error('stats error:', err);
     res.status(500).json({ error: 'Failed to fetch stats' });
   }
 });
