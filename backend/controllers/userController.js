@@ -1,5 +1,4 @@
 // controllers/userController.js
-const pool = require('../config/db');
 const supabase = require('../config/supabase');
 
 // Get all users
