@@ -19,7 +19,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    // Determine if identifier is email or phone
+    // Only send the identifier (email or phone) and password as plain fields
     const payload = { password };
     if (identifier.includes('@')) {
       payload.email = identifier.trim();
