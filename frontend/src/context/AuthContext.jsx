@@ -27,28 +27,9 @@ export function AuthProvider({ children }) {
   }, []);
 
 
-  const login = async (identifier, password) => {
-    // Determine if identifier is email or phone
-    const payload = { password };
-    if (identifier.includes('@')) {
-      payload.email = identifier.trim();
-    } else {
-      payload.phone = identifier.trim();
-    }
-
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Login failed');
-    }
-    const data = await res.json();
-    localStorage.setItem('token', data.token);
-    setUser(data.user);
-    return data.user;
+  const login = async (user, token) => {
+    setUser(user);
+    localStorage.setItem('token', token);
   };
 
   const logout = () => {

@@ -28,11 +28,11 @@ export default function Login() {
     }
 
     try {
-      const res = await axios.post(`${API_URL}/auth/login`, payload);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, payload);
       const { user, token } = res.data;
       await login(user, token);
 
-      // Role-based redirect: seller and buyer to /dashboard, admin to /admin/dashboard
+      // Role-based redirect
       if (user.role === 'admin') {
         navigate('/admin/dashboard');
       } else if (user.role === 'seller' || user.role === 'buyer') {
