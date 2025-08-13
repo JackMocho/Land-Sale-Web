@@ -24,8 +24,11 @@ exports.register = async (req, res) => {
 // Login user (plain text password check)
 exports.login = async (req, res) => {
   try {
-    const { email, phone, password } = req.body;
-    // Require either email or phone, and password
+    let { email, phone, password } = req.body;
+    // Treat empty strings as missing
+    email = email && email.trim() ? email.trim() : null;
+    phone = phone && phone.trim() ? phone.trim() : null;
+
     if ((!email && !phone) || !password) {
       return res.status(400).json({ error: 'Email or phone and password required' });
     }

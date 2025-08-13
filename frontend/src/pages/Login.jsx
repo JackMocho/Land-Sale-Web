@@ -20,8 +20,8 @@ export default function Login() {
     setError('');
     // Only send email if filled, otherwise send phone
     const payload = { password };
-    if (email) payload.email = email;
-    else if (phone) payload.phone = phone;
+    if (email.trim()) payload.email = email.trim();
+    if (!email.trim() && phone.trim()) payload.phone = phone.trim();
 
     try {
       // Example using axios
