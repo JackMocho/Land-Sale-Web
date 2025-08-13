@@ -26,15 +26,17 @@ export default function Login() {
     }
 
     try {
-      // Only send one identifier and password
-      await axios.post('/api/auth/login', { email, password });
-      // or
-      await axios.post('/api/auth/login', { phone, password });
-      const user = await login(identifier, password);
+      const res = await axios.post('/api/auth/login', payload);
+      const { user, token } = res.data;
+      await login(user, token);
+
+      // Role-based redirect
       if (user.role === 'admin') {
         navigate('/admin/dashboard');
-      } else if (user.role === 'seller' || user.role === 'buyer') {
-        navigate('/dashboard');
+      } else if (user.role === 'seller') {
+        navigate('/seller/dashboard');
+      } else if (user.role === 'buyer') {
+        navigate('/buyer/dashboard');
       } else {
         navigate('/');
       }
