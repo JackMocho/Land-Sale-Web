@@ -36,10 +36,12 @@ exports.getPropertyById = async (req, res) => {
 // Create property
 exports.createProperty = async (req, res) => {
   try {
+    // Make sure req.body contains all required fields for your Property table
     const { data, error } = await supabase.from('Property').insert([req.body]).select();
     if (error) throw error;
     res.status(201).json(data[0]);
   } catch (err) {
+    console.error('Create property error:', err); // <--- Add this for debugging
     res.status(500).json({ error: 'Failed to create property' });
   }
 };
