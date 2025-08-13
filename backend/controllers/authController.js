@@ -22,6 +22,7 @@ exports.register = async (req, res) => {
 };
 
 // Login user (plain text password check)
+// Allow login with email OR phone, only if isVerified = 'true'
 exports.login = async (req, res) => {
   try {
     let { email, phone, password } = req.body;
@@ -32,7 +33,8 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'Email or phone and password required' });
     }
 
-    let query = supabase.from('User').select('*');
+    // Build query: match by email OR phone, and isVerified = 'true'
+    let query = supabase.from('User').select('*').eq('isVerified', 'true');
     if (email) {
       query = query.eq('email', email);
     } else if (phone) {
@@ -41,14 +43,11 @@ exports.login = async (req, res) => {
     const { data: user, error } = await query.single();
 
     if (error) {
-      // Log Supabase error for debugging
       console.error('Supabase error:', error);
       return res.status(400).json({ error: 'Invalid credentials' });
     }
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
     if (user.password !== password) return res.status(400).json({ error: 'Invalid credentials' });
-
-    console.log('User found:', user); // Log the found user object
 
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ user, token });
