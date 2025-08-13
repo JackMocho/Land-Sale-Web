@@ -43,7 +43,8 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'Email or phone and password required' });
     }
 
-    let query = supabase.from('User').select('*').eq('isVerified', 'true');
+    // Build query: match by email OR phone, and isVerified = true (boolean)
+    let query = supabase.from('User').select('*').eq('isVerified', true);
     if (email) {
       query = query.eq('email', email);
     } else if (phone) {
@@ -54,7 +55,7 @@ exports.login = async (req, res) => {
     if (error || !user) return res.status(400).json({ error: 'Invalid credentials' });
     if (user.password !== password) return res.status(400).json({ error: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ user, token });
   } catch (err) {
     res.status(500).json({ error: 'Login failed' });
