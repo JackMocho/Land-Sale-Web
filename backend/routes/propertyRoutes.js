@@ -8,15 +8,7 @@ const path = require('path');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 // Import Controller
-const {
-  getAllProperties,
-  getPropertyById,
-  createProperty,
-  updateProperty,
-  deleteProperty,
-  getMyListings,
-  approveProperty
-} = require('../controllers/propertyController');
+const propertyController = require('../controllers/propertyController');
 
 // Configure multer for uploads
 const storage = multer.diskStorage({
@@ -35,49 +27,49 @@ const upload = multer({ storage });
  * @route   GET /api/properties
  * @access  Public
  */
-router.get('/', getAllProperties);
+router.get('/', propertyController.getProperties);
 
 /**
  * @desc    Get property by ID
  * @route   GET /api/properties/:id
  * @access  Public
  */
-router.get('/:id', getPropertyById);
+router.get('/:id', propertyController.getPropertyById);
 
 /**
  * @desc    Create a new property listing
  * @route   POST /api/properties
  * @access  Private (seller only)
  */
-router.post('/', protect, authorize('seller', 'admin'), createProperty);
+router.post('/', protect, authorize('seller', 'admin'), propertyController.createProperty);
 
 /**
  * @desc    Update property listing (owner or admin)
  * @route   PUT /api/properties/:id
  * @access  Private
  */
-router.put('/:id', protect, updateProperty);
+router.put('/:id', protect, propertyController.updateProperty);
 
 /**
  * @desc    Delete property listing (owner or admin)
  * @route   DELETE /api/properties/:id
  * @access  Private
  */
-router.delete('/:id', protect, deleteProperty);
+router.delete('/:id', protect, propertyController.deleteProperty);
 
 /**
  * @desc    Get logged-in user's property listings
  * @route   GET /api/properties/my-listings
  * @access  Private
  */
-router.get('/my-listings', protect, getMyListings);
+router.get('/my-listings', protect, propertyController.getMyListings);
 
 /**
  * @desc    Admin: Approve a property listing
  * @route   PUT /api/properties/:id/approve
  * @access  Private/Admin
  */
-router.put('/:id/approve', protect, authorize('admin'), approveProperty);
+router.put('/:id/approve', protect, authorize('admin'), propertyController.approveProperty);
 
 /**
  * @desc    Upload an image

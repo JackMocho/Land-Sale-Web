@@ -1,5 +1,6 @@
 // controllers/inquiryController.js
 const pool = require('../config/db');
+const supabase = require('../config/supabase');
 
 // Create an inquiry for a property
 exports.createInquiry = async (req, res) => {
@@ -63,5 +64,25 @@ exports.getMyInquiries = async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ message: 'Failed to retrieve inquiries', error: error.message });
+  }
+};
+
+exports.getInquiries = async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('Inquiry').select('*');
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch inquiries' });
+  }
+};
+
+exports.createInquiry = async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('Inquiry').insert([req.body]).select();
+    if (error) throw error;
+    res.status(201).json(data[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create inquiry' });
   }
 };

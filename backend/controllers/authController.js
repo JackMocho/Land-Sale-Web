@@ -1,58 +1,26 @@
 // controllers/authController.js
-const jwt = require('jsonwebtoken');
 const supabase = require('../config/supabase');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { JWT_SECRET } = process.env;
 
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
 exports.register = async (req, res) => {
-  const { name, email, phone, password, county, constituency, role } = req.body;
-
-  if (!email || !phone || !password || !name) {
-    return res.status(400).json({ message: 'Name, email, phone, and password are required.' });
-  }
-
   try {
-    // Check if email or phone already exists
-    const { data: existingUser, error: fetchError } = await supabase
-      .from('User')
-      .select('*')
-      .or(`email.eq.${email},phone.eq.${phone}`)
-      .single();
+    const { email, password, name, phone } = req.body;
+    const { data: existingUser } = await supabase.from('User').select('id').eq('email', email).single();
+    if (existingUser) return res.status(400).json({ error: 'Email already exists' });
 
-    if (fetchError) {
-      throw fetchError;
-    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const { data, error } = await supabase.from('User').insert([{ email, password: hashedPassword, name, phone }]).select();
+    if (error) throw error;
 
-    if (existingUser) {
-      return res.status(400).json({ message: 'Email or phone already registered.' });
-    }
-
-    // Store user (isVerified can be set to TRUE for testing)
-    const { data: newUser, error: insertError } = await supabase
-      .from('User')
-      .insert([
-        {
-          name,
-          email,
-          phone,
-          password,
-          county: county || null,
-          constituency: constituency || null,
-          role: role || 'buyer',
-          isVerified: true
-        }
-      ])
-      .select('id, name, email, phone, county, constituency, role, isVerified')
-      .single();
-
-    if (insertError) {
-      throw insertError;
-    }
-
-    res.status(201).json({ user: newUser });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    const token = jwt.sign({ id: data[0].id, email: data[0].email }, JWT_SECRET, { expiresIn: '7d' });
+    res.status(201).json({ user: data[0], token });
+  } catch (err) {
+    res.status(500).json({ error: 'Registration failed' });
   }
 };
 
@@ -60,47 +28,18 @@ exports.register = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 exports.login = async (req, res) => {
-  const { identifier, password } = req.body;
-
   try {
-    const { data: user, error: userError } = await supabase
-      .from('User')
-      .select('*')
-      .or(`email.eq.${identifier},phone.eq.${identifier}`)
-      .single();
+    const { email, password } = req.body;
+    const { data: user } = await supabase.from('User').select('*').eq('email', email).single();
+    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
 
-    if (userError || !user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ error: 'Invalid credentials' });
 
-    if (!user.isVerified) {
-      return res.status(403).json({ message: 'Account not verified. Please contact admin.' });
-    }
-
-    if (user.password !== password) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign(
-      { userId: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.json({
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        county: user.county,
-        constituency: user.constituency
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ user, token });
+  } catch (err) {
+    res.status(500).json({ error: 'Login failed' });
   }
 };
 

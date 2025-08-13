@@ -1,21 +1,20 @@
 // controllers/adminController.js
-const pool = require('../config/db');
+const supabase = require('../config/supabase');
 
 // Get admin dashboard stats
 exports.getStats = async (req, res) => {
   try {
-    const [usersResult, propertiesResult, pendingResult, inquiriesResult] = await Promise.all([
-      pool.query('SELECT COUNT(*) FROM "User"'),
-      pool.query('SELECT COUNT(*) FROM "Property"'),
-      pool.query('SELECT COUNT(*) FROM "Property" WHERE "isApproved" = false'),
-      pool.query('SELECT COUNT(*) FROM "Inquiry"')
+    const [{ data: users }, { data: properties }, { data: pending }, { data: inquiries }] = await Promise.all([
+      supabase.from('User').select('id'),
+      supabase.from('Property').select('id'),
+      supabase.from('Property').select('id').eq('isApproved', false),
+      supabase.from('Inquiry').select('id')
     ]);
-
     res.json({
-      users: parseInt(usersResult.rows[0].count, 10),
-      properties: parseInt(propertiesResult.rows[0].count, 10),
-      pending: parseInt(pendingResult.rows[0].count, 10),
-      inquiries: parseInt(inquiriesResult.rows[0].count, 10)
+      users: users ? users.length : 0,
+      properties: properties ? properties.length : 0,
+      pending: pending ? pending.length : 0,
+      inquiries: inquiries ? inquiries.length : 0
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -25,14 +24,33 @@ exports.getStats = async (req, res) => {
 // Get all pending properties (not approved)
 exports.getPendingProperties = async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT p.*, u.name AS user_name, u.email AS user_email
-       FROM "Property" p
-       LEFT JOIN "User" u ON p."ownerId" = u.id
-       WHERE p."isApproved" = false
-       ORDER BY p."createdAt" DESC`
-    );
-    res.json(result.rows);
+    // Get all pending properties
+    const { data: properties, error: propertiesError } = await supabase
+      .from('Property')
+      .select('*')
+      .eq('isApproved', false)
+      .order('created_at', { ascending: false });
+
+    if (propertiesError) throw propertiesError;
+
+    // Get all users for mapping owner info
+    const { data: users, error: usersError } = await supabase
+      .from('User')
+      .select('id, name, email');
+
+    if (usersError) throw usersError;
+
+    // Attach user info to each property
+    const enriched = (properties || []).map(p => {
+      const user = users?.find(u => u.id === p.ownerId) || {};
+      return {
+        ...p,
+        user_name: user.name || null,
+        user_email: user.email || null
+      };
+    });
+
+    res.json(enriched);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

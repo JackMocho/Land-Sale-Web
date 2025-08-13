@@ -21,25 +21,7 @@ exports.getProperties = async (req, res) => {
     const { data, error } = await query;
     if (error) throw error;
 
-    const properties = (data || []).map(row => {
-      try {
-        row.images = row.images && typeof row.images === 'string'
-          ? JSON.parse(row.images)
-          : Array.isArray(row.images) ? row.images : [];
-      } catch {
-        row.images = [];
-      }
-      try {
-        row.documents = row.documents && typeof row.documents === 'string'
-          ? JSON.parse(row.documents)
-          : Array.isArray(row.documents) ? row.documents : [];
-      } catch {
-        row.documents = [];
-      }
-      return row;
-    });
-
-    res.json(properties);
+    res.json(data);
   } catch (err) {
     console.error('getProperties error:', err);
     res.status(500).json({ error: 'Failed to fetch properties' });
@@ -52,29 +34,6 @@ exports.getPropertyById = async (req, res) => {
     const { id } = req.params;
     const { data, error } = await supabase.from('Property').select('*').eq('id', id).single();
     if (error || !data) return res.status(404).json({ error: 'Not found' });
-
-    // Optionally fetch seller info
-    let seller = null;
-    if (data.sellerid) {
-      const sellerRes = await supabase.from('User').select('id, name, phone').eq('id', data.sellerid).single();
-      seller = sellerRes.data || null;
-    }
-    data.seller = seller;
-
-    try {
-      data.images = data.images && typeof data.images === 'string'
-        ? JSON.parse(data.images)
-        : Array.isArray(data.images) ? data.images : [];
-    } catch {
-      data.images = [];
-    }
-    try {
-      data.documents = data.documents && typeof data.documents === 'string'
-        ? JSON.parse(data.documents)
-        : Array.isArray(data.documents) ? data.documents : [];
-    } catch {
-      data.documents = [];
-    }
 
     res.json(data);
   } catch (err) {
