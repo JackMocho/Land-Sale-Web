@@ -6,16 +6,26 @@ const { JWT_SECRET } = process.env;
 // Register user (plain text password)
 exports.register = async (req, res) => {
   try {
-    const { email, password, name, phone } = req.body;
-    const { data: existingUser } = await supabase.from('User').select('id').eq('email', email).single();
-    if (existingUser) return res.status(400).json({ error: 'Email already exists' });
+    const { email, phone, password, name, county, constituency, role } = req.body;
+    // Set isVerified to 'false' by default (or 'true' if you want auto-verify)
+    const isVerified = 'false';
 
-    // Store password as plain text (NOT recommended for production)
-    const { data, error } = await supabase.from('User').insert([{ email, password, name, phone }]).select();
+    // Check for existing user
+    const { data: existingUser } = await supabase
+      .from('User')
+      .select('id')
+      .or(`email.eq.${email},phone.eq.${phone}`)
+      .maybeSingle();
+
+    if (existingUser) return res.status(400).json({ error: 'Email or phone already exists' });
+
+    const { data, error } = await supabase.from('User').insert([
+      { email, phone, password, name, county, constituency, role: role || 'buyer', isVerified }
+    ]).select();
+
     if (error) throw error;
 
-    const token = jwt.sign({ id: data[0].id, email: data[0].email }, JWT_SECRET, { expiresIn: '7d' });
-    res.status(201).json({ user: data[0], token });
+    res.status(201).json({ user: data[0] });
   } catch (err) {
     res.status(500).json({ error: 'Registration failed' });
   }
@@ -33,7 +43,6 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'Email or phone and password required' });
     }
 
-    // Build query: match by email OR phone, and isVerified = 'true'
     let query = supabase.from('User').select('*').eq('isVerified', 'true');
     if (email) {
       query = query.eq('email', email);
@@ -42,11 +51,7 @@ exports.login = async (req, res) => {
     }
     const { data: user, error } = await query.single();
 
-    if (error) {
-      console.error('Supabase error:', error);
-      return res.status(400).json({ error: 'Invalid credentials' });
-    }
-    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+    if (error || !user) return res.status(400).json({ error: 'Invalid credentials' });
     if (user.password !== password) return res.status(400).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
