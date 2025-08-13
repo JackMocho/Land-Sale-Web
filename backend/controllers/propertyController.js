@@ -6,18 +6,17 @@ exports.getProperties = async (req, res) => {
   try {
     let query = supabase.from('Property').select('*');
     if (req.query.isApproved) {
+      // Make sure your column is named exactly 'isApproved' (case-sensitive)
       query = query.eq('isApproved', req.query.isApproved === 'true');
     }
-    if (req.query.county) {
-      query = query.eq('county', req.query.county);
-    }
-    if (req.query.constituency) {
-      query = query.eq('constituency', req.query.constituency);
-    }
     const { data, error } = await query;
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({ error: error.message });
+    }
     res.json(data);
   } catch (err) {
+    console.error('getProperties error:', err);
     res.status(500).json({ error: 'Failed to fetch properties' });
   }
 };
