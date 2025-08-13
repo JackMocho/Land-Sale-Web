@@ -8,7 +8,8 @@ import axios from 'axios';
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [identifier, setIdentifier] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,11 +18,16 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError('');
+    // Only send email if filled, otherwise send phone
+    const payload = { password };
+    if (email) payload.email = email;
+    else if (phone) payload.phone = phone;
+
     try {
       // Example using axios
-      await axios.post('/api/auth/login', { email: identifier, password });
+      await axios.post('/api/auth/login', payload);
       
-      const user = await login(identifier, password);
+      const user = await login(email || phone, password);
       if (user.role === 'admin') {
         navigate('/admin/dashboard');
       } else if (user.role === 'seller' || user.role === 'buyer') {
@@ -46,15 +52,26 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow">
           <div className="mb-6">
-            <label className="block text-gray-700 mb-2">Email or Phone</label>
+            <label className="block text-gray-700 mb-2">Email</label>
             <input
-              type="text"
-              name="identifier"
-              value={identifier}
-              onChange={e => setIdentifier(e.target.value)}
+              type="email"
+              name="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               className="w-full border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="you@domain.com or 1234567890"
-              required
+              placeholder="you@domain.com"
+            />
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-gray-700 mb-2">Phone</label>
+            <input
+              type="tel"
+              name="phone"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              className="w-full border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="1234567890"
             />
           </div>
 
