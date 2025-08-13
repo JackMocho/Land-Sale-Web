@@ -26,6 +26,7 @@ export default function Login() {
     } else {
       payload.phone = identifier.trim();
     }
+    await axios.post(`${API_URL}/auth/login`, payload);
 
     try {
       const res = await axios.post(`${API_URL}/auth/login`, payload);

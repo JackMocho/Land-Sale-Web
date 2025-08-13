@@ -75,3 +75,10 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+// Example
+const login = (user, token) => {
+  setUser(user);
+  localStorage.setItem('token', token);
+  // Do NOT set password to token
+};
