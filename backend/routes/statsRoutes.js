@@ -1,14 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../config/db');
+const supabase = require('../config/supabase');
 
 router.get('/stats', async (req, res) => {
   try {
-    const usersRes = await pool.query('SELECT COUNT(*) FROM "User"');
-    const listingsRes = await pool.query('SELECT COUNT(*) FROM "Property" WHERE "isApproved"=true');
+    const { data: users, error: userError } = await supabase.from('User').select('id');
+    const { data: listings, error: listingError } = await supabase.from('Property').select('id').eq('isApproved', true);
+
+    if (userError || listingError) throw userError || listingError;
+
     res.json({
-      users: parseInt(usersRes.rows[0].count, 10),
-      listings: parseInt(listingsRes.rows[0].count, 10)
+      users: users ? users.length : 0,
+      listings: listings ? listings.length : 0
     });
   } catch (err) {
     console.error('stats error:', err);
