@@ -5,6 +5,8 @@ import { useState } from 'react';
 import Button from '../components/Button';
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL || 'https://land-sale-backend.onrender.com';
+
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -26,7 +28,7 @@ export default function Login() {
     }
 
     try {
-      const res = await axios.post('/api/auth/login', payload);
+      const res = await axios.post(`${API_URL}/api/auth/login`, payload);
       const { user, token } = res.data;
       await login(user, token);
 
