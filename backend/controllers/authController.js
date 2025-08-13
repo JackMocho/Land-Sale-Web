@@ -1,20 +1,17 @@
 // controllers/authController.js
 const supabase = require('../config/supabase');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const { JWT_SECRET } = process.env;
 
-// @desc    Register user
-// @route   POST /api/auth/register
-// @access  Public
+// Register user (plain text password)
 exports.register = async (req, res) => {
   try {
     const { email, password, name, phone } = req.body;
     const { data: existingUser } = await supabase.from('User').select('id').eq('email', email).single();
     if (existingUser) return res.status(400).json({ error: 'Email already exists' });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const { data, error } = await supabase.from('User').insert([{ email, password: hashedPassword, name, phone }]).select();
+    // Store password as plain text (NOT recommended for production)
+    const { data, error } = await supabase.from('User').insert([{ email, password, name, phone }]).select();
     if (error) throw error;
 
     const token = jwt.sign({ id: data[0].id, email: data[0].email }, JWT_SECRET, { expiresIn: '7d' });
@@ -24,17 +21,15 @@ exports.register = async (req, res) => {
   }
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
+// Login user (plain text password check)
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const { data: user } = await supabase.from('User').select('*').eq('email', email).single();
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
 
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ error: 'Invalid credentials' });
+    // Compare plain text passwords
+    if (user.password !== password) return res.status(400).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ user, token });
