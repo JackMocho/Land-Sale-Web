@@ -19,6 +19,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError('');
+
     // Only send the identifier (email or phone) and password as plain fields
     const payload = { password };
     if (identifier.includes('@')) {
@@ -26,10 +27,9 @@ export default function Login() {
     } else {
       payload.phone = identifier.trim();
     }
-    await axios.post(`${API_URL}/auth/login`, payload);
 
     try {
-      const res = await axios.post(`${API_URL}/auth/login`, payload);
+      const res = await axios.post(`${API_URL}/api/auth/login`, payload);
       const { user, token } = res.data;
       await login(user, token);
 
