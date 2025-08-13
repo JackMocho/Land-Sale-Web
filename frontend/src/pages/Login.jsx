@@ -26,7 +26,10 @@ export default function Login() {
     }
 
     try {
-      await axios.post('/api/auth/login', payload);
+      // Only send one identifier and password
+      await axios.post('/api/auth/login', { email, password });
+      // or
+      await axios.post('/api/auth/login', { phone, password });
       const user = await login(identifier, password);
       if (user.role === 'admin') {
         navigate('/admin/dashboard');
