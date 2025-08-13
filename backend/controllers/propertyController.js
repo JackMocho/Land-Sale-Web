@@ -72,3 +72,20 @@ exports.deleteProperty = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete property' });
   }
 };
+
+// Approve property
+exports.approveProperty = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('Property')
+      .update({ isApproved: true })
+      .eq('id', id)
+      .select();
+    if (error) throw error;
+    if (!data || data.length === 0) return res.status(404).json({ error: 'Property not found' });
+    res.json({ success: true, property: data[0] });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to approve property' });
+  }
+};

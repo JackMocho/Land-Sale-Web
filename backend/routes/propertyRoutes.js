@@ -38,4 +38,11 @@ router.put('/:id', propertyController.updateProperty);
  */
 router.delete('/:id', propertyController.deleteProperty);
 
+/**
+ * @desc    Approve property listing (admin only)
+ * @route   PUT /api/properties/:id/approve
+ * @access  Private
+ */
+router.put('/:id/approve', propertyController.approveProperty);
+
 module.exports = router;
