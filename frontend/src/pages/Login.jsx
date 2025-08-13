@@ -8,8 +8,7 @@ import axios from 'axios';
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [identifier, setIdentifier] = useState(''); // for email or phone
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,16 +17,17 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    // Only send email if filled, otherwise send phone
+    // Determine if identifier is email or phone
     const payload = { password };
-    if (email.trim()) payload.email = email.trim();
-    if (!email.trim() && phone.trim()) payload.phone = phone.trim();
+    if (identifier.includes('@')) {
+      payload.email = identifier.trim();
+    } else {
+      payload.phone = identifier.trim();
+    }
 
     try {
-      // Example using axios
       await axios.post('/api/auth/login', payload);
-      
-      const user = await login(email || phone, password);
+      const user = await login(identifier, password);
       if (user.role === 'admin') {
         navigate('/admin/dashboard');
       } else if (user.role === 'seller' || user.role === 'buyer') {
@@ -36,7 +36,7 @@ export default function Login() {
         navigate('/');
       }
     } catch (err) {
-      setError(err.message || 'Invalid credentials. Please try again.');
+      setError(err.response?.data?.error || 'Invalid credentials. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -52,26 +52,15 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow">
           <div className="mb-6">
-            <label className="block text-gray-700 mb-2">Email</label>
+            <label className="block text-gray-700 mb-2">Email or Phone</label>
             <input
-              type="email"
-              name="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              type="text"
+              name="identifier"
+              value={identifier}
+              onChange={e => setIdentifier(e.target.value)}
               className="w-full border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="you@domain.com"
-            />
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-gray-700 mb-2">Phone</label>
-            <input
-              type="tel"
-              name="phone"
-              value={phone}
-              onChange={e => setPhone(e.target.value)}
-              className="w-full border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="1234567890"
+              placeholder="Enter your email or phone"
+              autoComplete="username"
             />
           </div>
 
@@ -85,6 +74,7 @@ export default function Login() {
               className="w-full border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
               placeholder="••••••••"
               required
+              autoComplete="current-password"
             />
           </div>
 
