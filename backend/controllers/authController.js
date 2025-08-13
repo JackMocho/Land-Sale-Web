@@ -24,13 +24,22 @@ exports.register = async (req, res) => {
 // Login user (plain text password check)
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+    const { email, phone, password } = req.body;
+    // Require either email or phone, and password
+    if ((!email && !phone) || !password) {
+      return res.status(400).json({ error: 'Email or phone and password required' });
+    }
 
-    const { data: user } = await supabase.from('User').select('*').eq('email', email).single();
+    // Build query: match by email OR phone
+    let query = supabase.from('User').select('*');
+    if (email) {
+      query = query.eq('email', email);
+    } else if (phone) {
+      query = query.eq('phone', phone);
+    }
+    const { data: user } = await query.single();
+
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
-
-    // Compare plain text passwords
     if (user.password !== password) return res.status(400).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
