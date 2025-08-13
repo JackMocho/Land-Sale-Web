@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useState } from 'react';
 import Button from '../components/Button';
+import axios from 'axios';
 
 export default function Login() {
   const { login } = useAuth();
@@ -17,6 +18,9 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
+      // Example using axios
+      await axios.post('/api/auth/login', { email: identifier, password });
+      
       const user = await login(identifier, password);
       if (user.role === 'admin') {
         navigate('/admin/dashboard');

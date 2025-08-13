@@ -25,6 +25,8 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+
     const { data: user } = await supabase.from('User').select('*').eq('email', email).single();
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
 
