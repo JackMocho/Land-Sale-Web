@@ -1,5 +1,6 @@
 // controllers/userController.js
 const pool = require('../config/db');
+const supabase = require('../config/supabase');
 
 // @desc    Get all users (Admin only)
 // @route   GET /api/users
@@ -139,5 +140,15 @@ exports.suspendUser = async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to suspend user' });
+  }
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('User').select('*');
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch users' });
   }
 };

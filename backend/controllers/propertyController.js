@@ -1,6 +1,7 @@
 // controllers/propertyController.js
 const pool = require('../config/db');
 const turf = require('@turf/turf');
+const supabase = require('../config/supabase');
 
 // @desc    Get all approved properties with filters
 // @route   GET /api/properties
@@ -260,25 +261,17 @@ exports.approveProperty = async (req, res) => {
 // @access  Public or Private (admin)
 exports.getProperties = async (req, res) => {
   try {
-    let query = 'SELECT * FROM "Property"';
-    const params = [];
-    const conditions = [];
-
-    // Filter by approval
+    let query = supabase.from('Property').select('*');
     if (req.query.isApproved) {
-      conditions.push('"isApproved" = $' + (params.length + 1));
-      params.push(req.query.isApproved === 'true');
+      query = query.eq('isApproved', req.query.isApproved === 'true');
     }
     // Add more filters as needed...
 
-    if (conditions.length > 0) {
-      query += ' WHERE ' + conditions.join(' AND ');
-    }
-
-    const result = await pool.query(query, params);
+    const { data, error } = await query;
+    if (error) throw error;
 
     // Parse images/documents for each property
-    const properties = result.rows.map(row => {
+    const properties = (data || []).map(row => {
       try {
         row.images = row.images && typeof row.images === 'string'
           ? JSON.parse(row.images)
