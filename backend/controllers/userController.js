@@ -58,18 +58,3 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete user' });
   }
 };
-
-// Get users with optional approval filter
-exports.getUsers = async (req, res) => {
-  try {
-    let query = supabase.from('User').select('*');
-    if (req.query.isApproved === 'false') {
-      query = query.eq('isApproved', false);
-    }
-    const { data, error } = await query;
-    if (error) throw error;
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch users' });
-  }
-};

@@ -43,15 +43,16 @@ export default function AdminDashboard() {
       }
     };
 
-    // Fetch only unapproved users
-    const fetchUnapprovedUsers = async () => {
+    const fetchUsers = async () => {
       setLoadingUsers(true);
       try {
-        const res = await api.get('/users?isApproved=false');
-        const unapproved = Array.isArray(res.data) ? res.data : [];
-        setUsers(unapproved);
+        const res = await api.get('/users');
+        const allUsers = Array.isArray(res.data) ? res.data : [];
+        setUsers(allUsers.filter(u => !u.isSuspended));
+        setSuspendedUsers(allUsers.filter(u => u.isSuspended));
       } catch (err) {
         setUsers([]);
+        setSuspendedUsers([]);
       } finally {
         setLoadingUsers(false);
       }
@@ -70,7 +71,7 @@ export default function AdminDashboard() {
     };
 
     fetchDashboardData();
-    fetchUnapprovedUsers();
+    fetchUsers();
     fetchApprovedParcels();
   }, [user]);
 
@@ -191,13 +192,13 @@ export default function AdminDashboard() {
               </table>
             </div>
 
-            {/* Unapproved Users Table */}
+            {/* Total Users */}
             <div className="bg-white p-6 rounded-lg shadow mb-8">
-              <h2 className="text-xl font-semibold mb-4">Users Awaiting Approval: {users.length}</h2>
+              <h2 className="text-xl font-semibold mb-4">Total Users: {users.length}</h2>
               {loadingUsers ? (
                 <p>Loading users...</p>
               ) : users.length === 0 ? (
-                <p>No users awaiting approval.</p>
+                <p>No users found.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
@@ -220,17 +221,27 @@ export default function AdminDashboard() {
                           <td className="px-4 py-2 capitalize">{user.role}</td>
                           <td className="px-4 py-2">{user.county}</td>
                           <td className="px-4 py-2 space-x-2">
-                            <Link
-                              to={`/user/${user.id}`}
-                              className="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700"
-                            >
-                              View
-                            </Link>
+                            {(!user.isApproved || user.isSuspended) && (
+                              <button
+                                onClick={() => handleApproveUser(user.id)}
+                                className="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700"
+                              >
+                                Approve
+                              </button>
+                            )}
+                            {user.isApproved && !user.isSuspended && (
+                              <button
+                                onClick={() => handleSuspend(user.id)}
+                                className="bg-yellow-500 text-white px-2 py-1 rounded text-xs hover:bg-yellow-600"
+                              >
+                                Suspend
+                              </button>
+                            )}
                             <button
-                              onClick={() => handleApproveUser(user.id)}
-                              className="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700"
+                              onClick={() => handleDelete(user.id)}
+                              className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
                             >
-                              Approve
+                              Delete
                             </button>
                           </td>
                         </tr>
