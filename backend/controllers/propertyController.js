@@ -5,18 +5,14 @@ const supabase = require('../config/supabase');
 exports.getProperties = async (req, res) => {
   try {
     let query = supabase.from('Property').select('*');
-    if (req.query.isApproved) {
-      // Make sure your column is named exactly 'isApproved' (case-sensitive)
-      query = query.eq('isApproved', req.query.isApproved === 'true');
+    if (req.query.sellerId) {
+      query = query.eq('sellerId', req.query.sellerId);
     }
+    // Add other filters as needed (e.g., isApproved)
     const { data, error } = await query;
-    if (error) {
-      console.error('Supabase error:', error);
-      return res.status(500).json({ error: error.message });
-    }
+    if (error) throw error;
     res.json(data);
   } catch (err) {
-    console.error('getProperties error:', err);
     res.status(500).json({ error: 'Failed to fetch properties' });
   }
 };
