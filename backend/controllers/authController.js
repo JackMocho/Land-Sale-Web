@@ -8,7 +8,7 @@ exports.register = async (req, res) => {
   try {
     const { email, phone, password, name, county, constituency, role } = req.body;
     // Set isVerified to 'false' by default (or 'true' if you want auto-verify)
-    const isVerified = 'false';
+    const isVerified = 'true';
 
     // Check for existing user
     const { data: existingUser } = await supabase
