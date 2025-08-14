@@ -35,8 +35,8 @@ export default function PropertyDetail() {
         setProperty({ ...res.data, images: fixedImages });
 
         // Fetch seller info using sellerid
-        if (res.data.sellerid) {
-          const sellerRes = await api.get(`/users/${res.data.sellerid}`);
+        if (res.data.sellerId) {
+          const sellerRes = await api.get(`/users/${res.data.sellerId}`);
           setSeller(sellerRes.data);
         } else {
           setSeller(null);
