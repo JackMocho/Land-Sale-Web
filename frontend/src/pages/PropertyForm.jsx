@@ -317,7 +317,7 @@ export default function PropertyForm() {
           </div>
 
           {/* Land Boundary Drawing */}
-          <div>
+          {/*<div>
             <label className="block text-gray-700 mb-2">Draw Land Boundary (Optional)</label>
             <p className="text-sm text-gray-500 mb-2">
               Click the polygon tool (👆) and draw around your land parcel. Double-click to finish.
@@ -342,6 +342,7 @@ export default function PropertyForm() {
               </button>
             )}
           </div>
+          */}
 
           {/* Images */}
           <div>
