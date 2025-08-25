@@ -22,7 +22,7 @@ export default function Footer() {
           <h4 className="text-lg font-semibold mb-4">Contact & Support</h4>
           <ul className="space-y-2 text-gray-400">
             <li>📞 +254 745 420 900</li>
-            <li>📧 emissarygeospatials@gmail.com</li>
+            <li>📧 emissarygeospatial@gmail.com</li>
             <li>📍 Nairobi, Kenya</li>
           </ul>
           <div className="mt-4">
