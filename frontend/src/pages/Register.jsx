@@ -22,6 +22,9 @@ export default function Register() {
     confirmPassword: ''
   });
 
+  // Add state for showing/hiding passwords
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -189,12 +192,12 @@ export default function Register() {
             </div>
           </div>
 
-          {/* Password */}
+          {/* Password with show/hide tab */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-gray-700 mb-2">Password</label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -206,7 +209,7 @@ export default function Register() {
             <div>
               <label className="block text-gray-700 mb-2">Confirm Password</label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
@@ -215,6 +218,19 @@ export default function Register() {
                 required
               />
             </div>
+          </div>
+          {/* Show/Hide Password Tab */}
+          <div className="flex items-center mt-2">
+            <input
+              id="showPassword"
+              type="checkbox"
+              checked={showPassword}
+              onChange={() => setShowPassword((prev) => !prev)}
+              className="mr-2"
+            />
+            <label htmlFor="showPassword" className="text-sm text-gray-700 cursor-pointer">
+              Show Passwords
+            </label>
           </div>
 
           <div className="pt-2">
