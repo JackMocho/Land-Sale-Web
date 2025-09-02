@@ -43,6 +43,14 @@ export default function Register() {
     setError('');
     setSuccess('');
     setLoading(true);
+
+    // Password and Confirm Password must match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match.');
+      setLoading(false);
+      return;
+    }
+
     try {
       await api.post('/auth/register', formData);
       setSuccess('Registration successful! You can now log in.');
