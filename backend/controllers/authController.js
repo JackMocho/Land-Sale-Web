@@ -1,6 +1,7 @@
 // controllers/authController.js
 const supabase = require('../config/supabase');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { JWT_SECRET } = process.env;
 
 // Register user (plain text password)
@@ -81,4 +82,43 @@ const login = (user, token) => {
   setUser(user);
   localStorage.setItem('token', token);
   // Do NOT set password to token
+};
+
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  // 1. Find user by email
+  const { data: user } = await supabase.from('User').select('*').eq('email', email).single();
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  // 2. Generate token & expiry
+  const token = crypto.randomBytes(32).toString('hex');
+  const expires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+
+  // 3. Save token & expiry to user (add columns if needed)
+  await supabase.from('User').update({ resetToken: token, resetTokenExpires: expires }).eq('id', user.id);
+
+  // 4. Send email (pseudo-code, use nodemailer/sendgrid/etc)
+  // await sendResetEmail(user.email, `https://your-frontend/reset-password?token=${token}`);
+
+  res.json({ message: 'Password reset link sent to your email.' });
+};
+
+exports.resetPassword = async (req, res) => {
+  const { token, password } = req.body;
+  // 1. Find user by token and check expiry
+  const { data: user } = await supabase
+    .from('User')
+    .select('*')
+    .eq('resetToken', token)
+    .gt('resetTokenExpires', new Date().toISOString())
+    .single();
+  if (!user) return res.status(400).json({ error: 'Invalid or expired token.' });
+
+  // 2. Update password and clear token
+  await supabase
+    .from('User')
+    .update({ password, resetToken: null, resetTokenExpires: null })
+    .eq('id', user.id);
+
+  res.json({ message: 'Password has been reset. You can now log in.' });
 };

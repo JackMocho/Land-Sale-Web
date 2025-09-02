@@ -14,6 +14,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import SellerDashboard from './pages/SellerDashboard';
 import BuyerDashboard from './pages/BuyerDashboard';
 import Dashboard from './pages/Dashboard';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
             <Route path="/seller-dashboard" element={<SellerDashboard />} />
             <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           </Routes>
         </main>
         <Footer />
