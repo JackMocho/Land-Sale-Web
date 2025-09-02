@@ -178,17 +178,7 @@ export default function Register() {
                 />
                 <span>Seller</span>
               </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="role"
-                  value="admin"
-                  checked={formData.role === 'admin'}
-                  onChange={handleChange}
-                  className="mr-2 h-4 w-4 text-blue-900"
-                />
-                <span>Admin</span>
-              </label>
+              
             </div>
           </div>
 
