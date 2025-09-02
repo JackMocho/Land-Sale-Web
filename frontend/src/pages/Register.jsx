@@ -53,9 +53,9 @@ export default function Register() {
 
     try {
       await api.post('/auth/register', formData);
-      setSuccess('Registration successful! You can now log in.');
-      // Redirect to homepage after successful registration
-      navigate('/');
+      setSuccess('You have successfully Registered! Proceed to login');
+      // Optionally, you can delay navigation to allow user to read the message
+      // setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed.');
     } finally {
