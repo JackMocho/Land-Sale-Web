@@ -39,8 +39,8 @@ export default function Home() {
       try {
         const res = await api.get('/properties?isApproved=TRUE');
         let properties = Array.isArray(res.data) ? res.data : [];
-        // Shuffle and pick 6
-        properties = properties.sort(() => 0.5 - Math.random()).slice(0, 6);
+        // Shuffle and pick 3
+        properties = properties.sort(() => 0.5 - Math.random()).slice(0, 3);
         setApprovedProperties(properties);
       } catch {
         setApprovedProperties([]);
