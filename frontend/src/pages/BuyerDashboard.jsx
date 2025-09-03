@@ -12,7 +12,7 @@ export default function BuyerDashboard() {
     // Fetch only approved properties
     async function fetchApprovedProperties() {
       try {
-        const res = await api.get('/properties?isApproved=true');
+        const res = await api.get('/properties?isApproved=TRUE');
         setProperties(res.data);
       } catch (err) {
         setProperties([]);

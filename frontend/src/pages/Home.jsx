@@ -37,7 +37,7 @@ export default function Home() {
     async function fetchFeatured() {
       setLoading(true);
       try {
-        const res = await api.get('/properties?isApproved=true');
+        const res = await api.get('/properties?isApproved=TRUE');
         let properties = Array.isArray(res.data) ? res.data : [];
         // Shuffle and pick 6
         properties = properties.sort(() => 0.5 - Math.random()).slice(0, 6);
@@ -80,7 +80,7 @@ export default function Home() {
               Find Your Perfect Land Parcel in Kenya
             </h1>
             <p className="text-lg text-gray-700 mb-6 opacity-90">
-              Discover, search, and list land parcels across all counties and constituencies. Trusted by thousands of sellers and buyers.
+              Discover, search, and list land parcels across all counties and constituencies. Trusted by thousands of sellers and Investors.
             </p>
             <div className="flex gap-4">
               <Link
