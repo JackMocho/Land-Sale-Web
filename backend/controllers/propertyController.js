@@ -8,7 +8,11 @@ exports.getProperties = async (req, res) => {
     if (req.query.sellerId) {
       query = query.eq('sellerId', req.query.sellerId);
     }
-    // Add other filters as needed (e.g., isApproved)
+    if (req.query.isApproved !== undefined) {
+      // Only treat 'true' (any case) as true, else false
+      const isApproved = String(req.query.isApproved).toLowerCase() === 'true';
+      query = query.eq('isApproved', isApproved);
+    }
     const { data, error } = await query;
     if (error) throw error;
     res.json(data);
