@@ -1,5 +1,5 @@
 // controllers/authController.js
-const supabase = require('../config/supabase');
+const pool = require('../config/pg');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { JWT_SECRET } = process.env;
@@ -8,25 +8,21 @@ const { JWT_SECRET } = process.env;
 exports.register = async (req, res) => {
   try {
     const { email, phone, password, name, county, constituency, role } = req.body;
-    // Set isVerified to 'false' by default (or 'true' if you want auto-verify)
-    const isVerified = 'true';
+    const isVerified = true;
 
     // Check for existing user
-    const { data: existingUser } = await supabase
-      .from('User')
-      .select('id')
-      .or(`email.eq.${email},phone.eq.${phone}`)
-      .maybeSingle();
+    const { rows: existingUser } = await pool.query(
+      'SELECT id FROM "User" WHERE email = $1 OR phone = $2',
+      [email, phone]
+    );
+    if (existingUser.length > 0) return res.status(400).json({ error: 'Email or phone already exists' });
 
-    if (existingUser) return res.status(400).json({ error: 'Email or phone already exists' });
-
-    const { data, error } = await supabase.from('User').insert([
-      { email, phone, password, name, county, constituency, role: role || 'buyer', isVerified }
-    ]).select();
-
-    if (error) throw error;
-
-    res.status(201).json({ user: data[0] });
+    const { rows } = await pool.query(
+      `INSERT INTO "User" (email, phone, password, name, county, constituency, role, isVerified)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [email, phone, password, name, county, constituency, role || 'buyer', isVerified]
+    );
+    res.status(201).json({ user: rows[0] });
   } catch (err) {
     res.status(500).json({ error: 'Registration failed' });
   }
@@ -45,16 +41,19 @@ exports.login = async (req, res) => {
     }
 
     // Build query: match by email OR phone, and isVerified = true (boolean)
-    let query = supabase.from('User').select('*').eq('isVerified', true);
+    let queryStr = 'SELECT * FROM "User" WHERE "isVerified" = TRUE';
+    let params = [];
     if (email) {
-      query = query.eq('email', email);
+      queryStr += ' AND email = $1';
+      params = [email];
     } else if (phone) {
-      query = query.eq('phone', phone);
+      queryStr += ' AND phone = $1';
+      params = [phone];
     }
-    const { data: user, error } = await query.single();
+    const { rows } = await pool.query(queryStr, params);
+    const user = rows[0];
 
-    if (error || !user) return res.status(400).json({ error: 'Invalid credentials' });
-    if (user.password !== password) return res.status(400).json({ error: 'Invalid credentials' });
+    if (!user || user.password !== password) return res.status(400).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ user, token });
@@ -86,39 +85,37 @@ const login = (user, token) => {
 
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
-  // 1. Find user by email
-  const { data: user } = await supabase.from('User').select('*').eq('email', email).single();
+  const { rows } = await pool.query('SELECT * FROM "User" WHERE email = $1', [email]);
+  const user = rows[0];
   if (!user) return res.status(404).json({ error: 'User not found' });
 
-  // 2. Generate token & expiry
   const token = crypto.randomBytes(32).toString('hex');
   const expires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
 
-  // 3. Save token & expiry to user (add columns if needed)
-  await supabase.from('User').update({ resetToken: token, resetTokenExpires: expires }).eq('id', user.id);
+  await pool.query(
+    'UPDATE "User" SET "resetToken" = $1, "resetTokenExpires" = $2 WHERE id = $3',
+    [token, expires, user.id]
+  );
 
-  // 4. Send email (pseudo-code, use nodemailer/sendgrid/etc)
-  // await sendResetEmail(user.email, `https://your-frontend/reset-password?token=${token}`);
+  // TODO: Send email with reset link
 
   res.json({ message: 'Password reset link sent to your email.' });
 };
 
 exports.resetPassword = async (req, res) => {
   const { token, password } = req.body;
-  // 1. Find user by token and check expiry
-  const { data: user } = await supabase
-    .from('User')
-    .select('*')
-    .eq('resetToken', token)
-    .gt('resetTokenExpires', new Date().toISOString())
-    .single();
+  const now = new Date();
+  const { rows } = await pool.query(
+    'SELECT * FROM "User" WHERE "resetToken" = $1 AND "resetTokenExpires" > $2',
+    [token, now]
+  );
+  const user = rows[0];
   if (!user) return res.status(400).json({ error: 'Invalid or expired token.' });
 
-  // 2. Update password and clear token
-  await supabase
-    .from('User')
-    .update({ password, resetToken: null, resetTokenExpires: null })
-    .eq('id', user.id);
+  await pool.query(
+    'UPDATE "User" SET password = $1, "resetToken" = NULL, "resetTokenExpires" = NULL WHERE id = $2',
+    [password, user.id]
+  );
 
   res.json({ message: 'Password has been reset. You can now log in.' });
 };

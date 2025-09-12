@@ -29,7 +29,7 @@ router.post('/', propertyController.createProperty);
  * @route   PUT /api/properties/:id
  * @access  Private
  */
-router.put('/:id', propertyController.updateProperty);
+router.put('/:id', propertyController.updateProperty); // <-- This must be a function
 
 /**
  * @desc    Delete property listing (owner or admin)

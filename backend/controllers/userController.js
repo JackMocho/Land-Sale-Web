@@ -1,12 +1,11 @@
 // controllers/userController.js
-const supabase = require('../config/supabase');
+const pool = require('../config/pg');
 
 // Get all users
 exports.getAllUsers = async (req, res) => {
   try {
-    const { data, error } = await supabase.from('User').select('*');
-    if (error) throw error;
-    res.json(data);
+    const { rows } = await pool.query('SELECT * FROM "User"');
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch users' });
   }
@@ -16,9 +15,9 @@ exports.getAllUsers = async (req, res) => {
 exports.getUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const { data, error } = await supabase.from('User').select('*').eq('id', id).single();
-    if (error || !data) return res.status(404).json({ error: 'Not found' });
-    res.json(data);
+    const { rows } = await pool.query('SELECT * FROM "User" WHERE id = $1', [id]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
+    res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch user' });
   }
@@ -27,9 +26,15 @@ exports.getUserById = async (req, res) => {
 // Create user
 exports.createUser = async (req, res) => {
   try {
-    const { data, error } = await supabase.from('User').insert([req.body]).select();
-    if (error) throw error;
-    res.status(201).json(data[0]);
+    const {
+      name, email, phone, county, constituency, role = 'buyer', password, isVerified = true
+    } = req.body;
+    const { rows } = await pool.query(
+      `INSERT INTO "User" (name, email, phone, county, constituency, role, password, isVerified)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [name, email, phone, county, constituency, role, password, isVerified]
+    );
+    res.status(201).json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to create user' });
   }
@@ -39,9 +44,16 @@ exports.createUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { data, error } = await supabase.from('User').update(req.body).eq('id', id).select();
-    if (error) throw error;
-    res.json(data[0]);
+    const updates = req.body;
+    const fields = Object.keys(updates);
+    const values = Object.values(updates);
+    const setClause = fields.map((f, i) => `"${f}" = $${i + 1}`).join(', ');
+    const { rows } = await pool.query(
+      `UPDATE "User" SET ${setClause} WHERE id = $${fields.length + 1} RETURNING *`,
+      [...values, id]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
+    res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update user' });
   }
@@ -51,8 +63,8 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { error } = await supabase.from('User').delete().eq('id', id);
-    if (error) throw error;
+    const { rowCount } = await pool.query('DELETE FROM "User" WHERE id = $1', [id]);
+    if (rowCount === 0) return res.status(404).json({ error: 'User not found' });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete user' });

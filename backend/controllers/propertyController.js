@@ -15,9 +15,9 @@ exports.getProperties = async (req, res) => {
 exports.getPropertyById = async (req, res) => {
   try {
     const { id } = req.params;
-    const { data, error } = await supabase.from('Property').select('*').eq('id', id).single();
-    if (error || !data) return res.status(404).json({ error: 'Not found' });
-    res.json(data);
+    const { rows } = await pool.query('SELECT * FROM "Property" WHERE id = $1', [id]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Property not found' });
+    res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch property' });
   }
@@ -26,15 +26,19 @@ exports.getPropertyById = async (req, res) => {
 // Create property
 exports.createProperty = async (req, res) => {
   try {
-    const propertyData = {
-      ...req.body,
-      isApproved: false // Always set to false on creation
-    };
-    const { data, error } = await supabase.from('Property').insert([propertyData]).select();
-    if (error) throw error;
-    res.status(201).json(data[0]);
+    const {
+      sellerId, title, description, location, county, constituency,
+      price, size, sizeUnit, images, coordinates, boundary
+    } = req.body;
+    const { rows } = await pool.query(
+      `INSERT INTO "Property"
+        (sellerId, title, description, location, county, constituency, price, size, sizeUnit, images, coordinates, boundary)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        RETURNING *`,
+      [sellerId, title, description, location, county, constituency, price, size, sizeUnit, images, coordinates, boundary]
+    );
+    res.status(201).json(rows[0]);
   } catch (err) {
-    console.error('Create property error:', err);
     res.status(500).json({ error: 'Failed to create property' });
   }
 };
@@ -43,9 +47,16 @@ exports.createProperty = async (req, res) => {
 exports.updateProperty = async (req, res) => {
   try {
     const { id } = req.params;
-    const { data, error } = await supabase.from('Property').update(req.body).eq('id', id).select();
-    if (error) throw error;
-    res.json(data[0]);
+    const updates = req.body;
+    const fields = Object.keys(updates);
+    const values = Object.values(updates);
+    const setClause = fields.map((f, i) => `"${f}" = $${i + 1}`).join(', ');
+    const { rows } = await pool.query(
+      `UPDATE "Property" SET ${setClause} WHERE id = $${fields.length + 1} RETURNING *`,
+      [...values, id]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: 'Property not found' });
+    res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update property' });
   }
@@ -55,8 +66,8 @@ exports.updateProperty = async (req, res) => {
 exports.deleteProperty = async (req, res) => {
   try {
     const { id } = req.params;
-    const { error } = await supabase.from('Property').delete().eq('id', id);
-    if (error) throw error;
+    const { rowCount } = await pool.query('DELETE FROM "Property" WHERE id = $1', [id]);
+    if (rowCount === 0) return res.status(404).json({ error: 'Property not found' });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete property' });
@@ -67,14 +78,12 @@ exports.deleteProperty = async (req, res) => {
 exports.approveProperty = async (req, res) => {
   try {
     const { id } = req.params;
-    const { data, error } = await supabase
-      .from('Property')
-      .update({ isApproved: true })
-      .eq('id', id)
-      .select();
-    if (error) throw error;
-    if (!data || data.length === 0) return res.status(404).json({ error: 'Property not found' });
-    res.json({ success: true, property: data[0] });
+    const { rows } = await pool.query(
+      'UPDATE "Property" SET "isApproved" = TRUE WHERE id = $1 RETURNING *',
+      [id]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: 'Property not found' });
+    res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to approve property' });
   }
