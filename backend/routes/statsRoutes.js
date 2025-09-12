@@ -1,23 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const supabase = require('../config/supabase');
+const pool = require('../config/pg');
 
-router.get('/stats', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const { data: users, error: userError } = await supabase.from('User').select('id');
-    const { data: listings, error: listingError } = await supabase.from('Property').select('id').eq('isApproved', true);
-
-    if (userError || listingError) {
-      console.error('Supabase error:', userError || listingError);
-      return res.status(500).json({ error: (userError || listingError).message });
-    }
-
+    const { rows: users } = await pool.query('SELECT COUNT(*) FROM "User"');
+    const { rows: listings } = await pool.query('SELECT COUNT(*) FROM "Property" WHERE "isApproved" = TRUE');
     res.json({
-      users: users ? users.length : 0,
-      listings: listings ? listings.length : 0
+      users: parseInt(users[0].count, 10),
+      listings: parseInt(listings[0].count, 10)
     });
-  } catch (err) {
-    console.error('stats error:', err);
+  } catch (error) {
+    console.error('stats error:', error);
     res.status(500).json({ error: 'Failed to fetch stats' });
   }
 });

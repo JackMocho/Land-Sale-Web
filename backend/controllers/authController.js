@@ -1,7 +1,6 @@
 // controllers/authController.js
 const pool = require('../config/pg');
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
 const { JWT_SECRET } = process.env;
 
 // Register user (plain text password)
@@ -32,15 +31,7 @@ exports.register = async (req, res) => {
 // Allow login with email OR phone, only if isVerified = 'true'
 exports.login = async (req, res) => {
   try {
-    let { email, phone, password } = req.body;
-    email = email && email.trim() ? email.trim() : null;
-    phone = phone && phone.trim() ? phone.trim() : null;
-
-    if ((!email && !phone) || !password) {
-      return res.status(400).json({ error: 'Email or phone and password required' });
-    }
-
-    // Build query: match by email OR phone, and isVerified = true (boolean)
+    const { email, phone, password } = req.body;
     let queryStr = 'SELECT * FROM "User" WHERE "isVerified" = TRUE';
     let params = [];
     if (email) {
@@ -49,12 +40,14 @@ exports.login = async (req, res) => {
     } else if (phone) {
       queryStr += ' AND phone = $1';
       params = [phone];
+    } else {
+      return res.status(400).json({ error: 'Email or phone required' });
     }
     const { rows } = await pool.query(queryStr, params);
     const user = rows[0];
-
-    if (!user || user.password !== password) return res.status(400).json({ error: 'Invalid credentials' });
-
+    if (!user || user.password !== password) {
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ user, token });
   } catch (err) {
