@@ -6,7 +6,7 @@ const pool = new Pool({
   database: process.env.PGDATABASE,
   user: process.env.PGUSER,
   password: process.env.PGPASSWORD,
-  ssl: { rejectUnauthorized: false } // Needed for most cloud DBs
+  ssl: { rejectUnauthorized: false } // Required for most cloud databases
 });
 
 module.exports = pool;

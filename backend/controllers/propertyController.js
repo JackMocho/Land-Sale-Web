@@ -1,21 +1,11 @@
 // controllers/propertyController.js
-const supabase = require('../config/supabase');
+const pool = require('../config/pg');
 
 // Get all properties (with optional filters)
 exports.getProperties = async (req, res) => {
   try {
-    let query = supabase.from('Property').select('*');
-    if (req.query.sellerId) {
-      query = query.eq('sellerId', req.query.sellerId);
-    }
-    if (req.query.isApproved !== undefined) {
-      // Only treat 'true' (any case) as true, else false
-      const isApproved = String(req.query.isApproved).toLowerCase() === 'true';
-      query = query.eq('isApproved', isApproved);
-    }
-    const { data, error } = await query;
-    if (error) throw error;
-    res.json(data);
+    const { rows } = await pool.query('SELECT * FROM "Property" WHERE "isApproved" = TRUE');
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch properties' });
   }
