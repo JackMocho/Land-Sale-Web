@@ -6,9 +6,7 @@ const { JWT_SECRET } = process.env;
 // Register user (plain text password)
 exports.register = async (req, res) => {
   try {
-    const { email, phone, password, name, county, constituency, role } = req.body;
-    const isVerified = true;
-
+    const { name, email, phone, county, constituency, role, password } = req.body;
     // Check for existing user
     const { rows: existingUser } = await pool.query(
       'SELECT id FROM "User" WHERE email = $1 OR phone = $2',
@@ -17,9 +15,9 @@ exports.register = async (req, res) => {
     if (existingUser.length > 0) return res.status(400).json({ error: 'Email or phone already exists' });
 
     const { rows } = await pool.query(
-      `INSERT INTO "User" (email, phone, password, name, county, constituency, role, isVerified)
+      `INSERT INTO "User" (name, email, phone, county, constituency, role, password, isVerified)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-      [email, phone, password, name, county, constituency, role || 'buyer', isVerified]
+      [name, email, phone, county, constituency, role || 'buyer', password, true]
     );
     res.status(201).json({ user: rows[0] });
   } catch (err) {

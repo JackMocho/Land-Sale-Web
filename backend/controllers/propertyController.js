@@ -27,15 +27,25 @@ exports.getPropertyById = async (req, res) => {
 exports.createProperty = async (req, res) => {
   try {
     const {
-      sellerId, title, description, location, county, constituency,
-      price, size, sizeUnit, images, coordinates, boundary
+      sellerId, title, description, price, size, sizeUnit, type,
+      county, constituency, location, coordinates, images, documents, boundary
     } = req.body;
+
+    // Ensure images/documents/boundary are JSON
+    const imagesJson = images ? JSON.stringify(images) : '[]';
+    const documentsJson = documents ? JSON.stringify(documents) : '[]';
+    const boundaryJson = boundary ? JSON.stringify(boundary) : null;
+
     const { rows } = await pool.query(
       `INSERT INTO "Property"
-        (sellerId, title, description, location, county, constituency, price, size, sizeUnit, images, coordinates, boundary)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        (sellerId, title, description, price, size, sizeUnit, type, county, constituency, location, coordinates, images, documents, boundary, isApproved)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13::jsonb,$14::jsonb,$15)
         RETURNING *`,
-      [sellerId, title, description, location, county, constituency, price, size, sizeUnit, images, coordinates, boundary]
+      [
+        sellerId, title, description, price, size, sizeUnit, type,
+        county, constituency, location, coordinates,
+        imagesJson, documentsJson, boundaryJson, false // isApproved default false
+      ]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
