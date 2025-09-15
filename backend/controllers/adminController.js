@@ -7,7 +7,7 @@ exports.getStats = async (req, res) => {
     const [{ rows: users }, { rows: properties }, { rows: pending }, { rows: inquiries }] = await Promise.all([
       pool.query('SELECT id FROM "User"'),
       pool.query('SELECT id FROM "Property"'),
-      pool.query('SELECT id FROM "Property" WHERE "isApproved" = FALSE'),
+      pool.query('SELECT id FROM "Property" WHERE "isapproved" = FALSE'),
       pool.query('SELECT id FROM "Inquiry"')
     ]);
     res.json({
@@ -25,7 +25,7 @@ exports.getStats = async (req, res) => {
 exports.getPendingProperties = async (req, res) => {
   try {
     const { rows: properties } = await pool.query(
-      'SELECT * FROM "Property" WHERE "isApproved" = FALSE ORDER BY "createdAt" DESC'
+      'SELECT * FROM "Property" WHERE "isapproved" = FALSE ORDER BY "createdAt" DESC'
     );
     const { rows: users } = await pool.query('SELECT id, name, email FROM "User"');
     // Attach user info to each property

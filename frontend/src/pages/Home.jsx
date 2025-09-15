@@ -37,7 +37,7 @@ export default function Home() {
     async function fetchFeatured() {
       setLoading(true);
       try {
-        const res = await api.get('/properties?isApproved=TRUE');
+        const res = await api.get('/properties?isapproved=TRUE');
         let properties = Array.isArray(res.data) ? res.data : [];
         // Shuffle and pick 3
         properties = properties.sort(() => 0.5 - Math.random()).slice(0, 3);
@@ -59,7 +59,7 @@ export default function Home() {
       const params = [];
       if (searchCounty) params.push(`county=${encodeURIComponent(searchCounty)}`);
       if (searchConstituency) params.push(`constituency=${encodeURIComponent(searchConstituency)}`);
-      params.push('isApproved=true');
+      params.push('isapproved=true');
       const res = await api.get(`/properties?${params.join('&')}`);
       setSearchResults(Array.isArray(res.data) ? res.data : []);
     } catch {

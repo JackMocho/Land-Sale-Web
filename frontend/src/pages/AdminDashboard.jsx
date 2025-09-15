@@ -31,7 +31,8 @@ export default function AdminDashboard() {
         const statsRes = await fetch(`${import.meta.env.VITE_API_URL}/admin/stats`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        const pendingRes = await api.get('/admin/properties/pending');
+        // FIX: Fetch pending listings where isapproved = false
+        const pendingRes = await api.get('/properties?isapproved=false');
         if (!statsRes.ok) throw new Error('Failed to fetch stats');
         const statsData = await statsRes.json();
         setStats(statsData);
