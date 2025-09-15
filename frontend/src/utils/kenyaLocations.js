@@ -52,7 +52,7 @@ export const kenyaCounties = [
 
 export const constituenciesByCounty = {
   "Mombasa": [
-    "Changamwe", "Jomvu", "Kisauni", "Likoni", "Mvita", "Kisauni", "Nyali"
+    "Changamwe", "Jomvu", "Likoni", "Mvita", "Kisauni", "Nyali"
   ],
   "Kwale": [
     "Matuga", "Msambweni", "Kinango", "Lunga Lunga"

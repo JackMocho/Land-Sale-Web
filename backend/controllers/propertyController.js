@@ -43,7 +43,7 @@ exports.createProperty = async (req, res) => {
         RETURNING *`,
       [
         sellerId, title, description, price, size, sizeUnit, type,
-        county, constituency, location, coordinates,
+        county, constituency, location, coordinates, // coordinates as VARCHAR
         imagesJson, documentsJson, boundaryJson, false // isApproved default false
       ]
     );
