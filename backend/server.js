@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const pool = require('./config/pg'); // Import your pg pool
 dotenv.config();
 dotenv.config();
 
@@ -35,6 +36,16 @@ app.use('/api', statsRoutes);
 // Test Route
 app.get('/api', (req, res) => {
   res.json({ status: 'ok', message: 'Land Sale API is running.' });
+});
+
+// Database health check route
+app.get('/api/db-health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1'); // Simple query
+    res.json({ connected: true });
+  } catch (err) {
+    res.status(500).json({ connected: false, error: err.message });
+  }
 });
 
 const PORT = process.env.PORT || 5000;
