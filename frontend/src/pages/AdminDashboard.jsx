@@ -61,7 +61,7 @@ export default function AdminDashboard() {
     const fetchApprovedParcels = async () => {
       setLoadingParcels(true);
       try {
-        const res = await api.get('/properties?isApproved=true');
+        const res = await api.get('/properties?isapproved=true');
         setApprovedParcels(Array.isArray(res.data) ? res.data : []);
       } catch {
         setApprovedParcels([]);

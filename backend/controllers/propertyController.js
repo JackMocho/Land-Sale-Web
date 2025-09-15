@@ -4,7 +4,7 @@ const pool = require('../config/pg');
 // Get all properties (with optional filters)
 exports.getProperties = async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM "Property" WHERE "isApproved" = TRUE');
+    const { rows } = await pool.query('SELECT * FROM "Property" WHERE "isapproved" = TRUE');
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch properties' });
@@ -31,24 +31,26 @@ exports.createProperty = async (req, res) => {
       county, constituency, location, coordinates, images, documents, boundary
     } = req.body;
 
-    // Ensure images/documents/boundary are JSON
-    const imagesJson = images ? JSON.stringify(images) : '[]';
-    const documentsJson = documents ? JSON.stringify(documents) : '[]';
-    const boundaryJson = boundary ? JSON.stringify(boundary) : null;
+    // Ensure images/documents are arrays, boundary is object or null
+    const imagesData = Array.isArray(images) ? images : [];
+    const documentsData = Array.isArray(documents) ? documents : [];
+    const boundaryData = boundary ? boundary : null;
 
     const { rows } = await pool.query(
       `INSERT INTO "Property"
-        (sellerId, title, description, price, size, sizeUnit, type, county, constituency, location, coordinates, images, documents, boundary, isApproved)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13::jsonb,$14::jsonb,$15)
+        (sellerId, title, description, price, size, sizeUnit, type, county, constituency, location, coordinates, images, documents, boundary, isapproved)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
         RETURNING *`,
       [
         sellerId, title, description, price, size, sizeUnit, type,
-        county, constituency, location, coordinates, // coordinates as VARCHAR
-        imagesJson, documentsJson, boundaryJson, false // isApproved default false
+        county, constituency, location, coordinates,
+        imagesData, documentsData, boundaryData, false
       ]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
+    // Log the error for debugging
+    console.error('Create property error:', err);
     res.status(500).json({ error: 'Failed to create property' });
   }
 };
@@ -89,7 +91,7 @@ exports.approveProperty = async (req, res) => {
   try {
     const { id } = req.params;
     const { rows } = await pool.query(
-      'UPDATE "Property" SET "isApproved" = TRUE WHERE id = $1 RETURNING *',
+      'UPDATE "Property" SET "isapproved" = TRUE WHERE id = $1 RETURNING *',
       [id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Property not found' });
