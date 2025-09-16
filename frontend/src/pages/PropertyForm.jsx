@@ -101,26 +101,47 @@ export default function PropertyForm() {
     setLoading(true);
 
     try {
-      await api.post('/properties', {
-        ...formData,
+      // Create a clean payload with properly formatted data
+      const payload = {
+        title: formData.title,
+        description: formData.description,
         price: parseFloat(formData.price),
         size: parseFloat(formData.size),
-        images, // array of base64 strings
-        documents, // array of base64 strings
-        boundary: formData.boundary ? JSON.parse(formData.boundary) : null,
-        sellerId: user.id
+        sizeUnit: formData.sizeUnit || 'acres',
+        type: formData.type,
+        county: formData.county,
+        constituency: formData.constituency,
+        location: formData.location,
+        coordinates: formData.coordinates,
+        sellerId: user.id,
+        // Ensure images and documents are properly formatted arrays
+        images: Array.isArray(images) ? images : [],
+        documents: Array.isArray(documents) ? documents : [],
+        // Handle boundary carefully
+        boundary: formData.boundary && typeof formData.boundary === 'string'
+          ? JSON.parse(formData.boundary)
+          : formData.boundary || null
+      };
+
+      // Log the payload for debugging (remove in production)
+      console.log('Submitting payload:', {
+        ...payload,
+        images: payload.images.map(img => img.substring(0, 50) + '...'), // Truncate base64 for logging
+        documents: payload.documents.map(doc => doc.substring(0, 50) + '...')
       });
 
-      alert('Congratulations your Parcel Sucessfully listed!');
-      navigate('/seller-dashboard'); // <-- Redirect to seller dashboard
+      await api.post('/properties', payload);
+
+      alert('Congratulations! Your parcel has been successfully listed!');
+      navigate('/seller-dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to list property.');
+      console.error('Submission error:', err);
+      setError(err.response?.data?.error || err.response?.data?.message || 'Failed to list property. Please check your data and try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Add this function to auto-pick user's current location
   const pickMyLocation = () => {
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by your browser.');
@@ -213,7 +234,7 @@ export default function PropertyForm() {
                 />
                 <select
                   name="sizeUnit"
-                  value={formData.sizeUnit}
+                  value={formData.sizeUnit || 'acres'}
                   onChange={handleChange}
                   className="border border-gray-300 p-3 rounded-r bg-gray-50"
                 >
@@ -300,49 +321,20 @@ export default function PropertyForm() {
                 }}
                 tileLayer={tileLayers[tileLayer]}
               />
-
             </div>
             <button
-                type="button"
-                onClick={pickMyLocation}
-                className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800 text-sm shadow"
-              >
-                Pick My Location
-              </button>
+              type="button"
+              onClick={pickMyLocation}
+              className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800 text-sm shadow"
+            >
+              Pick My Location
+            </button>
             {formData.coordinates && (
               <p className="text-sm text-gray-600 mt-2">
                 Selected Coordinates: {formData.coordinates}
               </p>
             )}
           </div>
-
-          {/* Land Boundary Drawing */}
-          {/*<div>
-            <label className="block text-gray-700 mb-2">Draw Land Boundary (Optional)</label>
-            <p className="text-sm text-gray-500 mb-2">
-              Click the polygon tool (👆) and draw around your land parcel. Double-click to finish.
-            </p>
-            <MapCoordinatePicker
-              onBoundaryChange={(boundary) => {
-                setFormData(prev => ({
-                  ...prev,
-                  boundary: boundary ? JSON.stringify(boundary) : null
-                }));
-              }}
-              boundary={boundary}
-              tileLayer={tileLayers[tileLayer]}
-            />
-            {formData.boundary && (
-              <button
-                type="button"
-                onClick={() => setFormData(prev => ({ ...prev, boundary: null }))}
-                className="mt-2 text-red-600 text-sm hover:underline"
-              >
-                Remove Boundary
-              </button>
-            )}
-          </div>
-          */}
 
           {/* Images */}
           <div>
