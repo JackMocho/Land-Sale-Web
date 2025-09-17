@@ -4,7 +4,7 @@ const pool = require('../config/pg');
 // Get all properties (with optional filters)
 exports.getProperties = async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM "Property" WHERE "isapproved" = TRUE');
+    const { rows } = await pool.query('SELECT * FROM "Property" WHERE "isApproved" = TRUE');
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch properties' });
@@ -61,7 +61,7 @@ exports.createProperty = async (req, res) => {
 
     const { rows } = await pool.query(
       `INSERT INTO "Property"
-        (sellerId, title, description, price, size, sizeUnit, type, county, constituency, location, coordinates, images, documents, boundary, isapproved)
+        (sellerId, title, description, price, size, sizeUnit, type, county, constituency, location, coordinates, images, documents, boundary, isApproved)
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
         RETURNING *`,
       [
@@ -113,7 +113,7 @@ exports.approveProperty = async (req, res) => {
   try {
     const { id } = req.params;
     const { rows } = await pool.query(
-      'UPDATE "Property" SET "isapproved" = TRUE WHERE id = $1 RETURNING *',
+      'UPDATE "Property" SET "isApproved" = TRUE WHERE id = $1 RETURNING *',
       [id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Property not found' });
