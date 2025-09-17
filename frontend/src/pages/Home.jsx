@@ -177,11 +177,7 @@ export default function Home() {
             <span className="text-lg text-gray-600 mt-2">Total Listings</span>
           </div>
         </div>
-        <div className="container mx-auto px-4 mt-6">
-          <p className="mt-2 text-sm opacity-80">
-            Built with ❤️ for Kenya. Powered by JavaScript & Node.JS.
-          </p>
-        </div>
+        
       </div>
     </div>
   );
