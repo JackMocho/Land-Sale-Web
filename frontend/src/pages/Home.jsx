@@ -72,24 +72,25 @@ export default function Home() {
   // Modern homepage styles
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-900">
-      <div className="container mx-auto px-6 py-12">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-12">
-          <div className="md:w-1/2 mb-8 md:mb-0">
-            <h1 className="text-5xl font-extrabold text-blue-900 mb-4 tracking-tight leading-tight"
+      <div className="container mx-auto px-4 sm:px-6 py-8 md:py-12">
+        {/* Modern Call to Action */}
+        <section className="flex flex-col-reverse md:flex-row items-center justify-between mb-12 gap-8">
+          <div className="md:w-1/2 flex flex-col items-start">
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-900 mb-4 tracking-tight leading-tight"
               style={{ textShadow: '0 2px 8px rgba(59,130,246,0.15)' }}>
               Find Your Perfect Land Parcel in Kenya
             </h1>
             <p className="text-lg text-gray-700 mb-6 opacity-90">
-              Discover, search, and list land parcels across all counties and constituencies. Trusted by thousands of sellers and Investors.
+              Discover, search, and list land parcels across all counties and constituencies. Trusted by thousands of sellers and investors.
             </p>
-            <div className="flex gap-4">
-              <Link
-                to="/register"
-                className="bg-white border border-blue-900 text-blue-900 font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-blue-50 transition-transform transform hover:scale-105 hover:-translate-y-1"
-              >
-                List Your Land
-              </Link>
-            </div>
+            <Link
+              to="/register"
+              className="bg-blue-900 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105 hover:-translate-y-1 text-lg mb-4 animate-pulse"
+              style={{ animationDuration: '2s' }}
+            >
+              List Your Land Now
+            </Link>
+            <span className="text-sm text-gray-500 mt-2">Get started in less than 30 seconds!</span>
           </div>
           <div className="md:w-1/2 flex justify-center">
             <img
@@ -97,14 +98,16 @@ export default function Home() {
               alt="Kenya Land"
               className="rounded-2xl shadow-2xl w-full max-w-md opacity-95 transform hover:scale-105 transition-transform duration-500"
               style={{ boxShadow: '0 8px 32px rgba(59,130,246,0.15)' }}
+              loading="eager"
+              fetchpriority="high"
             />
           </div>
-        </div>
+        </section>
 
         {/* Listings Section */}
-        <div className="mb-16">
+        <section className="mb-16">
           <h2 className="text-2xl font-bold text-blue-900 mb-6 text-center">Featured Land Parcels</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {(searchResults.length > 0 ? searchResults : approvedProperties).map(listing => (
               <div
                 key={listing.id}
@@ -118,6 +121,8 @@ export default function Home() {
                       className="w-full h-40 object-cover rounded-lg bg-gray-100"
                       style={{ transition: 'transform 0.3s', transform: 'scale(1)' }}
                       onError={e => { e.target.onerror = null; e.target.src = '/assets/wallpaper.png'; }}
+                      loading="lazy"
+                      fetchpriority="low"
                     />
                   ) : (
                     <div className="w-full h-40 flex items-center justify-center rounded-lg bg-gray-100">
@@ -153,14 +158,16 @@ export default function Home() {
               </div>
             )}
           </div>
-        </div>
+        </section>
 
-        {/* About Us Section */}
-        <AboutUs />
+        {/* About Us Section (contacts removed) */}
+        <section className="mb-12">
+          <AboutUs hideContacts />
+        </section>
       </div>
       {/* Stats at the bottom */}
       <div className="w-full py-8 bg-blue-900 text-white text-center mt-12 opacity-95">
-        <div className="container mx-auto px-6 flex flex-wrap justify-center gap-8">
+        <div className="container mx-auto px-4 flex flex-wrap justify-center gap-8">
           <div className="bg-white rounded-xl shadow-lg px-8 py-6 flex flex-col items-center transition hover:scale-105 hover:shadow-2xl">
             <span className="text-4xl font-bold text-blue-900">{stats.users}</span>
             <span className="text-lg text-gray-600 mt-2">Total Users</span>
@@ -170,8 +177,7 @@ export default function Home() {
             <span className="text-lg text-gray-600 mt-2">Total Listings</span>
           </div>
         </div>
-        <div className="container mx-auto px-6 mt-6">
-        
+        <div className="container mx-auto px-4 mt-6">
           <p className="mt-2 text-sm opacity-80">
             Built with ❤️ for Kenya. Powered by JavaScript & Node.JS.
           </p>
