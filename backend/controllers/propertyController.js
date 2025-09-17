@@ -31,18 +31,26 @@ exports.createProperty = async (req, res) => {
       county, constituency, location, coordinates, images, documents, boundary
     } = req.body;
 
-    // Defensive: ensure images/documents are arrays, boundary is object or null
+    // Defensive: ensure images/documents are arrays
     const imagesData = Array.isArray(images) ? images : [];
     const documentsData = Array.isArray(documents) ? documents : [];
+
+    // Improved boundary handling
     let boundaryData = null;
-    if (boundary && typeof boundary === 'string') {
-      try {
-        boundaryData = JSON.parse(boundary);
-      } catch {
-        boundaryData = null;
+    if (boundary) {
+      if (typeof boundary === 'string') {
+        try {
+          boundaryData = JSON.parse(boundary);
+        } catch {
+          boundaryData = null;
+        }
+      } else if (typeof boundary === 'object') {
+        boundaryData = boundary;
       }
-    } else if (boundary && typeof boundary === 'object') {
-      boundaryData = boundary;
+    }
+    // Explicitly set to null if undefined or empty
+    if (!boundary) {
+      boundaryData = null;
     }
 
     // Log for debugging
