@@ -44,6 +44,11 @@ exports.createProperty = async (req, res) => {
     const documentsData = Array.isArray(documents) ? documents : [];
     const boundaryData = boundary ? boundary : null;
 
+    // Defensive: ensure images/documents are arrays of strings (URLs)
+    if (!Array.isArray(imagesData) || !Array.isArray(documentsData)) {
+      return res.status(400).json({ error: 'Images and documents must be arrays.' });
+    }
+
     // Log payload for debugging
     console.log('Create property payload:', {
       sellerId, title, description, price, size, sizeUnit, type,

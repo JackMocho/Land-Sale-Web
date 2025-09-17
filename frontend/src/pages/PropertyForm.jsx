@@ -103,6 +103,24 @@ export default function PropertyForm() {
     setError('');
     setLoading(true);
 
+    // Validate required fields before sending
+    if (
+      !formData.title ||
+      !formData.description ||
+      !formData.price ||
+      !formData.size ||
+      !formData.sizeUnit ||
+      !formData.type ||
+      !formData.county ||
+      !formData.constituency ||
+      !formData.location ||
+      !formData.coordinates
+    ) {
+      setError('Please fill in all required fields.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const payload = {
         title: formData.title,
@@ -118,7 +136,7 @@ export default function PropertyForm() {
         sellerId: user.id,
         images: Array.isArray(images) ? images : [],
         documents: Array.isArray(documents) ? documents : [],
-        boundary: boundary || null // use boundary state, not formData.boundary
+        boundary: boundary || null
       };
 
       await api.post('/properties', payload);
