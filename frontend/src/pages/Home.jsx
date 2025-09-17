@@ -90,7 +90,7 @@ export default function Home() {
             >
               List Your Land Now
             </Link>
-            <span className="text-sm text-gray-500 mt-2">Get started in less than 30 seconds!</span>
+            
           </div>
           <div className="md:w-1/2 flex justify-center">
             <img
@@ -162,7 +162,7 @@ export default function Home() {
 
         {/* About Us Section (contacts removed) */}
         <section className="mb-12">
-          <AboutUs hideContacts />
+          <AboutUs />
         </section>
       </div>
       {/* Stats at the bottom */}
