@@ -101,8 +101,6 @@ export default function Home() {
           </div>
         </div>
 
-      
-
         {/* Listings Section */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold text-blue-900 mb-6 text-center">Featured Land Parcels</h2>
@@ -113,13 +111,18 @@ export default function Home() {
                 className="bg-white rounded-xl shadow-lg p-6 flex flex-col transition hover:scale-105 hover:shadow-2xl opacity-95"
               >
                 <div className="mb-4 relative">
-                  {Array.isArray(listing.images) && listing.images.length > 0 && (
+                  {Array.isArray(listing.images) && listing.images.length > 0 && listing.images[0] ? (
                     <img
                       src={listing.images[0]}
                       alt="Preview"
-                      className="w-full h-40 object-cover rounded-lg"
+                      className="w-full h-40 object-cover rounded-lg bg-gray-100"
                       style={{ transition: 'transform 0.3s', transform: 'scale(1)' }}
+                      onError={e => { e.target.onerror = null; e.target.src = '/assets/wallpaper.png'; }}
                     />
+                  ) : (
+                    <div className="w-full h-40 flex items-center justify-center rounded-lg bg-gray-100">
+                      <span className="text-gray-400 text-lg">No Image Available</span>
+                    </div>
                   )}
                   <div className="absolute bottom-2 left-2 right-2 bg-white bg-opacity-60 backdrop-blur-md rounded px-3 py-2">
                     <span className="text-lg font-bold text-blue-900">{listing.title}</span>
