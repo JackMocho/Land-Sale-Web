@@ -29,11 +29,7 @@ export default function AboutUs() {
           <p className="text-gray-700">
             To be Kenya’s most trusted digital land marketplace, empowering communities and driving economic growth through transparent property transactions.
           </p>
-          <h3 className="text-xl font-bold text-blue-800 mt-6 mb-2">Contacts</h3>
-          <p className="text-gray-700">
-            Email: <a href="mailto:emissarygeospatials@gmail.com" className="text-blue-700 underline">emissarygeospatial@gmail.com</a><br />
-            Phone: <span className="text-blue-700">+254 745 420 900</span>
-          </p>
+          
         </div>
       </div>
       
