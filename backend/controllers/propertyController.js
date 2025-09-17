@@ -31,25 +31,21 @@ exports.createProperty = async (req, res) => {
       county, constituency, location, coordinates, images, documents, boundary
     } = req.body;
 
-    // Validation: check required fields
-    if (
-      !sellerId || !title || !description || !price || !size || !sizeUnit ||
-      !type || !county || !constituency || !location || !coordinates
-    ) {
-      return res.status(400).json({ error: 'Missing required fields.' });
-    }
-
-    // Ensure images/documents are arrays, boundary is object or null
+    // Defensive: ensure images/documents are arrays, boundary is object or null
     const imagesData = Array.isArray(images) ? images : [];
     const documentsData = Array.isArray(documents) ? documents : [];
-    const boundaryData = boundary ? boundary : null;
-
-    // Defensive: ensure images/documents are arrays of strings (URLs)
-    if (!Array.isArray(imagesData) || !Array.isArray(documentsData)) {
-      return res.status(400).json({ error: 'Images and documents must be arrays.' });
+    let boundaryData = null;
+    if (boundary && typeof boundary === 'string') {
+      try {
+        boundaryData = JSON.parse(boundary);
+      } catch {
+        boundaryData = null;
+      }
+    } else if (boundary && typeof boundary === 'object') {
+      boundaryData = boundary;
     }
 
-    // Log payload for debugging
+    // Log for debugging
     console.log('Create property payload:', {
       sellerId, title, description, price, size, sizeUnit, type,
       county, constituency, location, coordinates, imagesData, documentsData, boundaryData
@@ -68,7 +64,6 @@ exports.createProperty = async (req, res) => {
     );
     res.status(201).json(rows[0]);
   } catch (err) {
-    // Log the actual error for debugging
     console.error('Create property error:', err);
     res.status(500).json({ error: err.message || 'Failed to create property' });
   }
