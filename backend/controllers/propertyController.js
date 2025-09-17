@@ -68,8 +68,9 @@ exports.createProperty = async (req, res) => {
     );
     res.status(201).json(rows[0]);
   } catch (err) {
+    // Log the actual error for debugging
     console.error('Create property error:', err);
-    res.status(500).json({ error: 'Failed to create property' });
+    res.status(500).json({ error: err.message || 'Failed to create property' });
   }
 };
 

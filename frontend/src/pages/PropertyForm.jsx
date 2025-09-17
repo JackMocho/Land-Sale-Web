@@ -139,6 +139,9 @@ export default function PropertyForm() {
         boundary: boundary || null
       };
 
+      // Log payload for debugging
+      console.log('Submitting property payload:', payload);
+
       await api.post('/properties', payload);
 
       alert('Congratulations! Your parcel has been successfully listed!');
