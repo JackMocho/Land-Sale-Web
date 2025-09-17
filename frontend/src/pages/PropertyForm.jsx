@@ -60,31 +60,33 @@ export default function PropertyForm() {
   };
 
   // Upload images to backend and store returned URLs
-  const handleImageUpload = async (e) => {
-    const files = Array.from(e.target.files);
-    const base64Images = await Promise.all(files.map(file => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result); // base64 string
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }));
-    setImages(prev => [...prev, ...base64Images]);
+  const handleImageUpload = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'my_upload_preset');
+    const res = await fetch('https://api.cloudinary.com/v1_1/dvafn7u0q/image/upload', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    setImages(prev => [...prev, data.secure_url]); // Store only the URL
   };
 
   // Upload documents to backend and store returned URLs
   const handleDocumentUpload = async (e) => {
     const files = Array.from(e.target.files);
-    const base64Docs = await Promise.all(files.map(file => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'my_upload_preset');
+      // Use /raw/upload for documents
+      const res = await fetch('https://api.cloudinary.com/v1_1/dvafn7u0q/raw/upload', {
+        method: 'POST',
+        body: formData,
       });
-    }));
-    setDocuments(prev => [...prev, ...base64Docs]);
+      const data = await res.json();
+      setDocuments(prev => [...prev, data.secure_url]);
+    }
   };
 
   const removeImage = (index) => {
@@ -130,7 +132,12 @@ export default function PropertyForm() {
         documents: payload.documents.map(doc => doc.substring(0, 50) + '...')
       });
 
-      await api.post('/properties', payload);
+      await api.post('/properties', {
+        ...formData,
+        images, // array of URLs
+        documents, // array of URLs
+        // ...other fields
+      });
 
       alert('Congratulations! Your parcel has been successfully listed!');
       navigate('/seller-dashboard');
