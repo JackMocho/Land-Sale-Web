@@ -31,7 +31,7 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/properties', require('./routes/propertyRoutes'));
 app.use('/api/inquiries', require('./routes/inquiryRoutes'));
 const statsRoutes = require('./routes/statsRoutes');
-app.use('/api', statsRoutes);
+app.use('/api/stats', statsRoutes);
 
 // Test Route
 app.get('/api', (req, res) => {
