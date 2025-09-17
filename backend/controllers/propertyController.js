@@ -31,10 +31,24 @@ exports.createProperty = async (req, res) => {
       county, constituency, location, coordinates, images, documents, boundary
     } = req.body;
 
+    // Validation: check required fields
+    if (
+      !sellerId || !title || !description || !price || !size || !sizeUnit ||
+      !type || !county || !constituency || !location || !coordinates
+    ) {
+      return res.status(400).json({ error: 'Missing required fields.' });
+    }
+
     // Ensure images/documents are arrays, boundary is object or null
     const imagesData = Array.isArray(images) ? images : [];
     const documentsData = Array.isArray(documents) ? documents : [];
     const boundaryData = boundary ? boundary : null;
+
+    // Log payload for debugging
+    console.log('Create property payload:', {
+      sellerId, title, description, price, size, sizeUnit, type,
+      county, constituency, location, coordinates, imagesData, documentsData, boundaryData
+    });
 
     const { rows } = await pool.query(
       `INSERT INTO "Property"
@@ -49,7 +63,6 @@ exports.createProperty = async (req, res) => {
     );
     res.status(201).json(rows[0]);
   } catch (err) {
-    // Log the error for debugging
     console.error('Create property error:', err);
     res.status(500).json({ error: 'Failed to create property' });
   }

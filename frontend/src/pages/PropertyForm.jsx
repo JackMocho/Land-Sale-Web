@@ -37,6 +37,7 @@ export default function PropertyForm() {
     description: '',
     price: '',
     size: '',
+    sizeUnit: 'acres', // <-- Add this line
     type: 'residential',
     county: '',
     constituency: '',
@@ -103,7 +104,6 @@ export default function PropertyForm() {
     setLoading(true);
 
     try {
-      // Create a clean payload with properly formatted data
       const payload = {
         title: formData.title,
         description: formData.description,
@@ -116,34 +116,22 @@ export default function PropertyForm() {
         location: formData.location,
         coordinates: formData.coordinates,
         sellerId: user.id,
-        // Ensure images and documents are properly formatted arrays
         images: Array.isArray(images) ? images : [],
         documents: Array.isArray(documents) ? documents : [],
-        // Handle boundary carefully
-        boundary: formData.boundary && typeof formData.boundary === 'string'
-          ? JSON.parse(formData.boundary)
-          : formData.boundary || null
+        boundary: boundary || null // use boundary state, not formData.boundary
       };
 
-      // Log the payload for debugging (remove in production)
-      console.log('Submitting payload:', {
-        ...payload,
-        images: payload.images.map(img => img.substring(0, 50) + '...'), // Truncate base64 for logging
-        documents: payload.documents.map(doc => doc.substring(0, 50) + '...')
-      });
-
-      await api.post('/properties', {
-        ...formData,
-        images, // array of URLs
-        documents, // array of URLs
-        // ...other fields
-      });
+      await api.post('/properties', payload);
 
       alert('Congratulations! Your parcel has been successfully listed!');
       navigate('/seller-dashboard');
     } catch (err) {
       console.error('Submission error:', err);
-      setError(err.response?.data?.error || err.response?.data?.message || 'Failed to list property. Please check your data and try again.');
+      setError(
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        'Failed to list property. Please check your data and try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -350,7 +338,10 @@ export default function PropertyForm() {
               type="file"
               accept="image/*"
               multiple
-              onChange={handleImageUpload}
+              onChange={e => {
+                const files = Array.from(e.target.files);
+                files.forEach(file => handleImageUpload(file));
+              }}
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-900 file:text-white hover:file:bg-blue-800"
             />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
