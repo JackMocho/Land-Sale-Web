@@ -6,6 +6,18 @@ import { kenyaCounties, constituenciesByCounty } from '../utils/kenyaLocations';
 import { useAuth } from '../context/AuthContext';
 import AboutUs from './AboutUs';
 
+// List of survey images for the gallery/slider section
+const surveyImages = [
+  '/assets/geo1.jpg',
+  '/assets/geo2.jpg',
+  '/assets/geo3.jpg',
+  '/assets/geo4.jpg',
+  '/assets/geo5.jpg',
+  '/assets/geo6.jpg',
+  '/assets/geo7.jpg',
+  '/assets/geo9.jpg'
+];
+
 export default function Home() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -15,6 +27,15 @@ export default function Home() {
   const [searchConstituency, setSearchConstituency] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentGallery, setCurrentGallery] = useState(0);
+
+  // Gallery image auto-rotation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentGallery((prev) => (prev + 1) % surveyImages.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch system stats
   useEffect(() => {
@@ -69,14 +90,50 @@ export default function Home() {
     }
   };
 
-  // Modern homepage styles
+  // Kenyan land law quotations
+  const statuteQuotes = [
+    {
+      quote: "“No land or interest in land may be disposed of except in accordance with the Land Act or any other written law.”",
+      source: "— Land Act, 2012 (Kenya), Section 3"
+    },
+    {
+      quote: "“A person shall not sell, transfer, lease or otherwise dispose of any land unless that person has a valid title to the land.”",
+      source: "— Land Registration Act, 2012 (Kenya), Section 26"
+    },
+    {
+      quote: "“All dealings in land must be in writing, signed by the parties and attested.”",
+      source: "— Land Registration Act, 2012 (Kenya), Section 38"
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-900">
-      <div className="container mx-auto px-4 sm:px-6 py-8 md:py-12">
+    <div className="relative min-h-screen bg-gradient-to-br from-blue-200 to-gray-100 overflow-x-hidden">
+      {/* Main background image (geo8) */}
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-20 pointer-events-none"
+        style={{
+          backgroundImage: "url('/assets/geo8.jpg')",
+          backgroundBlendMode: 'multiply',
+        }}
+        aria-hidden="true"
+      />
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 py-8 md:py-12">
+        {/* Caution Banner */}
+        <div className="mb-6">
+          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-900 p-4 rounded-lg shadow flex items-center gap-4">
+            <svg className="w-6 h-6 text-yellow-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" />
+            </svg>
+            <span>
+              <strong>Important:</strong> This platform <span className="underline font-semibold">DOES NOT handle any financial transactions</span>. All land transactions must be conducted in accordance with Kenyan law and verified independently. Always consult a licensed land surveyor and legal professional before making any commitments.
+            </span>
+          </div>
+        </div>
+
         {/* Modern Call to Action */}
         <section className="flex flex-col-reverse md:flex-row items-center justify-between mb-12 gap-8">
           <div className="md:w-1/2 flex flex-col items-start">
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-900 mb-4 tracking-tight leading-tight"
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-900 mb-4 tracking-tight leading-tight drop-shadow-lg"
               style={{ textShadow: '0 2px 8px rgba(59,130,246,0.15)' }}>
               Find Your Perfect Land Parcel in Kenya
             </h1>
@@ -90,17 +147,97 @@ export default function Home() {
             >
               List Your Land Now
             </Link>
-            
+            <form
+              onSubmit={handleSearch}
+              className="w-full bg-white bg-opacity-90 rounded-lg shadow-md p-4 flex flex-col sm:flex-row gap-4 mt-2"
+            >
+              <select
+                className="flex-1 border border-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={searchCounty}
+                onChange={e => {
+                  setSearchCounty(e.target.value);
+                  setSearchConstituency('');
+                }}
+              >
+                <option value="">Select County</option>
+                {kenyaCounties.map(county => (
+                  <option key={county} value={county}>{county}</option>
+                ))}
+              </select>
+              <select
+                className="flex-1 border border-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={searchConstituency}
+                onChange={e => setSearchConstituency(e.target.value)}
+                disabled={!searchCounty}
+              >
+                <option value="">Select Constituency</option>
+                {searchCounty && constituenciesByCounty[searchCounty]?.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="bg-blue-700 text-white px-6 py-2 rounded font-semibold hover:bg-blue-800 transition"
+                disabled={loading}
+              >
+                {loading ? "Searching..." : "Search"}
+              </button>
+            </form>
           </div>
           <div className="md:w-1/2 flex justify-center">
+            {/* Main survey image (geo8) */}
             <img
-              src="/assets/wallpaper.png"
-              alt="Kenya Land"
-              className="rounded-2xl shadow-2xl w-full max-w-md opacity-95 transform hover:scale-105 transition-transform duration-500"
+              src="/assets/geo8.jpg"
+              alt="Survey Tools"
+              className="rounded-2xl shadow-2xl w-full max-w-md opacity-95 transform hover:scale-105 transition-transform duration-500 border-4 border-blue-200"
               style={{ boxShadow: '0 8px 32px rgba(59,130,246,0.15)' }}
               loading="eager"
               fetchpriority="high"
             />
+          </div>
+        </section>
+
+        {/* Survey Tools Gallery/Slider */}
+        <section className="mb-12">
+          <h2 className="text-xl font-bold text-blue-900 mb-4 text-center">WELCOME </h2>
+          <div className="flex flex-col items-center">
+            <div className="relative w-full max-w-2xl h-64 rounded-xl overflow-hidden shadow-lg mb-4">
+              <img
+                src={surveyImages[currentGallery]}
+                alt={`Survey Tool ${currentGallery + 1}`}
+                className="object-cover w-full h-full transition-all duration-700"
+                style={{ borderRadius: '1rem' }}
+              />
+              <div className="absolute bottom-2 right-2 bg-white bg-opacity-70 rounded px-3 py-1 text-blue-900 text-xs">
+                {`Survey Tool Image ${currentGallery + 1}`}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {surveyImages.map((img, idx) => (
+                <button
+                  key={img}
+                  className={`w-4 h-4 rounded-full border-2 ${currentGallery === idx ? 'bg-blue-700 border-blue-900' : 'bg-white border-blue-300'}`}
+                  onClick={() => setCurrentGallery(idx)}
+                  aria-label={`Show image ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Statute Quotations */}
+        <section className="mb-10">
+          <h2 className="text-xl font-bold text-blue-900 mb-4 text-center">Quotations from Kenyan Land Statutes</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {statuteQuotes.map((q, idx) => (
+              <blockquote
+                key={idx}
+                className="bg-white bg-opacity-90 rounded-xl shadow-md p-6 border-l-4 border-blue-700 text-gray-800 flex flex-col justify-between"
+              >
+                <span className="italic mb-2">&ldquo;{q.quote}&rdquo;</span>
+                <span className="text-sm text-blue-700 font-semibold mt-2">{q.source}</span>
+              </blockquote>
+            ))}
           </div>
         </section>
 
@@ -160,21 +297,21 @@ export default function Home() {
           </div>
         </section>
 
-        {/* About Us Section (contacts removed) */}
+        {/* About Us Section */}
         <section className="mb-12">
           <AboutUs />
         </section>
       </div>
       {/* Stats at the bottom */}
-      <div className="w-full py-8 bg-blue-900 text-white text-center mt-12 opacity-95">
+      <div className="w-full py-8 bg-gradient-to-bl from-blue-900 to-gray-100 text-white text-center mt-12 opacity-95">
         <div className="container mx-auto px-4 flex flex-wrap justify-center gap-8">
           <div className="bg-white rounded-xl shadow-lg px-8 py-6 flex flex-col items-center transition hover:scale-105 hover:shadow-2xl">
             <span className="text-4xl font-bold text-blue-900">{stats.users}</span>
-            <span className="text-lg text-gray-600 mt-2">Total Users</span>
+            <span className="text-lg text-gray-600 mt-2">System Users</span>
           </div>
-          <div className="bg-white rounded-xl shadow-lg px-8 py-6 flex flex-col items-center transition hover:scale-105 hover:shadow-2xl">
+          <div className="bg-white rounded-full shadow-lg px-8 py-6 flex flex-col items-center transition hover:scale-105 hover:shadow-2xl">
             <span className="text-4xl font-bold text-blue-900">{stats.listings}</span>
-            <span className="text-lg text-gray-600 mt-2">Total Listings</span>
+            <span className="text-lg text-gray-600 mt-2">Available Parcels</span>
           </div>
         </div>
         
