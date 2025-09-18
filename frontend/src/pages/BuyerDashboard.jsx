@@ -51,6 +51,8 @@ export default function BuyerDashboard() {
                   <th className="pb-2">Location</th>
                   <th className="pb-2">Price</th>
                   <th className="pb-2">Size</th>
+                  <th className="pb-2">Seller Name</th>
+                  <th className="pb-2">Seller Phone</th>
                   <th className="pb-2">Actions</th>
                 </tr>
               </thead>
@@ -61,6 +63,8 @@ export default function BuyerDashboard() {
                     <td>{property.location}</td>
                     <td>{property.price?.toLocaleString()}</td>
                     <td>{property.size} {property.sizeUnit}</td>
+                    <td>{property.seller_name || 'N/A'}</td>
+                    <td>{property.seller_phone || 'N/A'}</td>
                     <td>
                       <Link
                         to={`/property/${property.id}`}

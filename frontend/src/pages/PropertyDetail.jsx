@@ -99,10 +99,10 @@ export default function PropertyDetail() {
           <p><strong>Constituency:</strong> {property.constituency}</p>
           <p><strong>Location:</strong> {property.location}</p>
           <p>
-            <strong>Seller Name:</strong> {seller?.name || 'Not available'}
+            <strong>Seller Name:</strong> {property.seller_name || 'Not available'}
           </p>
           <p>
-            <strong>Seller Phone:</strong> {seller?.phone || 'Not available'}
+            <strong>Seller Phone:</strong> {property.seller_phone || 'Not available'}
           </p>
         </div>
         <div className="mb-6">

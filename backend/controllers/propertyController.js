@@ -4,15 +4,18 @@ const pool = require('../config/pg');
 // Get all properties (admin can see all, others only approved)
 exports.getProperties = async (req, res) => {
   try {
-    let query = 'SELECT * FROM "Property"';
+    let query = `
+      SELECT p.*, u.name as seller_name, u.phone as seller_phone
+      FROM "Property" p
+      LEFT JOIN "User" u ON p."sellerid" = u.id
+    `;
     const params = [];
     // Filter by sellerid if provided
     if (req.query.sellerid) {
-      query += ' WHERE "sellerid" = $1';
+      query += ' WHERE p."sellerid" = $1';
       params.push(req.query.sellerid);
     } else if (req.query.isApproved === 'TRUE') {
-      // Only show properties where BOTH isApproved and isapproved are true
-      query += ' WHERE "isApproved" = TRUE AND "isapproved" = TRUE';
+      query += ' WHERE p."isApproved" = TRUE AND p."isapproved" = TRUE';
     }
     const { rows } = await pool.query(query, params);
     res.json(rows);
@@ -21,11 +24,17 @@ exports.getProperties = async (req, res) => {
   }
 };
 
-// Get property by ID
+// Get property by ID (include seller info)
 exports.getPropertyById = async (req, res) => {
   try {
     const { id } = req.params;
-    const { rows } = await pool.query('SELECT * FROM "Property" WHERE id = $1', [id]);
+    const { rows } = await pool.query(
+      `SELECT p.*, u.name as seller_name, u.phone as seller_phone
+       FROM "Property" p
+       LEFT JOIN "User" u ON p."sellerid" = u.id
+       WHERE p.id = $1`,
+      [id]
+    );
     if (rows.length === 0) return res.status(404).json({ error: 'Property not found' });
     res.json(rows[0]);
   } catch (err) {
