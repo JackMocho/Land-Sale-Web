@@ -123,11 +123,17 @@ exports.deleteProperty = async (req, res) => {
 exports.approveProperty = async (req, res) => {
   try {
     const { id } = req.params;
+    // Update BOTH isApproved and isapproved to true
     const { rows } = await pool.query(
-      'UPDATE "Property" SET "isApproved" = TRUE WHERE id = $1 RETURNING *',
+      `UPDATE "Property"
+       SET "isApproved" = TRUE, "isapproved" = TRUE
+       WHERE id = $1
+       RETURNING *`,
       [id]
     );
-    if (rows.length === 0) return res.status(404).json({ error: 'Property not found' });
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Property not found' });
+    }
     res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to approve property' });

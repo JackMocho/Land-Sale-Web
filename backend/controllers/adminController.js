@@ -24,8 +24,9 @@ exports.getStats = async (req, res) => {
 // Get all pending properties (not approved)
 exports.getPendingProperties = async (req, res) => {
   try {
+    // Fetch properties where either isApproved or isapproved is false
     const { rows: properties } = await pool.query(
-      'SELECT * FROM "Property" WHERE "isApproved" = FALSE ORDER BY "created_at" DESC'
+      'SELECT * FROM "Property" WHERE ("isApproved" = FALSE OR "isapproved" = FALSE) ORDER BY "created_at" DESC'
     );
     const { rows: users } = await pool.query('SELECT id, name, email FROM "User"');
     // Attach user info to each property

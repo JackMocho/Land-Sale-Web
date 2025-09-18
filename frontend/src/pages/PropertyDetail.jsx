@@ -169,12 +169,18 @@ export default function PropertyDetail() {
         </div>
         <div className="mt-6">
           <h2 className="text-xl font-semibold mb-2">Documents</h2>
-          {property.documents && property.documents.length > 0 ? (
+          {Array.isArray(property.documents) && property.documents.length > 0 ? (
             <ul className="list-disc ml-6">
-              {property.documents.map((base64, idx) => (
+              {property.documents.map((docUrl, idx) => (
                 <li key={idx}>
-                  <a href={base64} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">
-                    Document {idx + 1}
+                  <a
+                    href={docUrl}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-700 underline"
+                  >
+                    Download Document {idx + 1}
                   </a>
                 </li>
               ))}

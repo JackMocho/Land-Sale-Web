@@ -36,10 +36,12 @@ export default function AdminDashboard() {
         if (!statsRes.ok) throw new Error('Failed to fetch stats');
         const statsData = await statsRes.json();
         setStats(statsData);
-        // Only show pending listings (isApproved === false)
+        // Only show pending listings (isApproved === false OR isapproved === false)
         setPendingListings(
           Array.isArray(allPropsRes.data)
-            ? allPropsRes.data.filter(p => !p.isApproved)
+            ? allPropsRes.data.filter(
+                p => (p.isApproved === false || p.isapproved === false)
+              )
             : []
         );
       } catch (err) {
@@ -418,14 +420,19 @@ export default function AdminDashboard() {
   async function handleApprove(propertyId) {
     if (!window.confirm("Approve this property listing?")) return;
     try {
+      // Approve on backend
       await api.put(`/properties/${propertyId}/approve`);
+      // Update UI: remove from pending, add to approved with both flags true
       setPendingListings(prev => prev.filter(p => p.id !== propertyId));
-      // Find the approved property and add to approvedParcels for instant UI update
       setApprovedParcels(prev => {
         const approvedProp = pendingListings.find(p => p.id === propertyId);
-        return approvedProp
-          ? [...prev, { ...approvedProp, isApproved: true }]
-          : prev;
+        if (approvedProp) {
+          return [
+            ...prev,
+            { ...approvedProp, isApproved: true, isapproved: true }
+          ];
+        }
+        return prev;
       });
       alert("Property approved!");
     } catch (err) {
