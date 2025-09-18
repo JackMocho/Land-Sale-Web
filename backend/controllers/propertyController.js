@@ -67,7 +67,10 @@ exports.createProperty = async (req, res) => {
       [
         sellerId, title, description, price, size, sizeUnit, type,
         county, constituency, location, coordinates,
-        imagesData, documentsData, boundaryData, false
+        JSON.stringify(imagesData), // <-- stringify here
+        JSON.stringify(documentsData), // <-- and here
+        boundaryData ? JSON.stringify(boundaryData) : null, // <-- and here if not null
+        false
       ]
     );
     res.status(201).json(rows[0]);
