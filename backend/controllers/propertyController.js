@@ -6,10 +6,13 @@ exports.getProperties = async (req, res) => {
   try {
     let query = 'SELECT * FROM "Property"';
     const params = [];
-    // Filter by sellerid (lowercase, as in your DB) if provided
+    // Filter by sellerid if provided
     if (req.query.sellerid) {
       query += ' WHERE "sellerid" = $1';
       params.push(req.query.sellerid);
+    } else if (req.query.isApproved === 'TRUE') {
+      // Only show properties where BOTH isApproved and isapproved are true
+      query += ' WHERE "isApproved" = TRUE AND "isapproved" = TRUE';
     }
     const { rows } = await pool.query(query, params);
     res.json(rows);
