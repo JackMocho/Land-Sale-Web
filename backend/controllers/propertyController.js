@@ -4,14 +4,13 @@ const pool = require('../config/pg');
 // Get all properties (admin can see all, others only approved)
 exports.getProperties = async (req, res) => {
   try {
-    // If user is admin, return all properties; else only approved
     let query = 'SELECT * FROM "Property"';
-    let params = [];
-    // If you have authentication middleware and req.user, use it:
-    // if (!req.user || req.user.role !== 'admin') {
-    //   query += ' WHERE "isApproved" = TRUE';
-    // }
-    // For now, allow all properties for everyone (frontend can filter)
+    const params = [];
+    // Filter by sellerid (lowercase, as in your DB) if provided
+    if (req.query.sellerid) {
+      query += ' WHERE "sellerid" = $1';
+      params.push(req.query.sellerid);
+    }
     const { rows } = await pool.query(query, params);
     res.json(rows);
   } catch (err) {

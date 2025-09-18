@@ -14,7 +14,7 @@ export default function SellerDashboard() {
       setLoading(true);
       try {
         // Fetch listings for the logged-in seller
-        const res = await api.get(`/properties?sellerId=${user.id}`);
+        const res = await api.get(`/properties?sellerid=${user.id}`);
         // Ensure images is always an array and URLs are absolute
         const fixedListings = (Array.isArray(res.data) ? res.data : []).map(listing => {
           let images = [];
