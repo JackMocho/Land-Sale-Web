@@ -70,3 +70,20 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete user' });
   }
 };
+
+// Suspend user
+exports.suspendUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rows } = await pool.query(
+      `UPDATE "User" SET "isSuspended" = TRUE WHERE id = $1 RETURNING *`,
+      [id]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to suspend user' });
+  }
+};

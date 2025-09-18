@@ -14,7 +14,7 @@ export default function Navbar() {
   return (
     <nav className="bg-gradient-to-bl from-slate-950 to-red-950 text-white p-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold">LandSales Kenya</Link>
+        <Link to="/" className="text-2xl font-bold">Land Sales</Link>
         <div className="space-x-6 flex items-center">
           <Link to="/" className="hover:underline">Home</Link>
           {!user && (

@@ -229,14 +229,6 @@ export default function AdminDashboard() {
                           <td className="px-4 py-2 capitalize">{user.role}</td>
                           <td className="px-4 py-2">{user.county}</td>
                           <td className="px-4 py-2 space-x-2">
-                            {(!user.isApproved || user.isSuspended) && (
-                              <button
-                                onClick={() => handleApproveUser(user.id)}
-                                className="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700"
-                              >
-                                Approve
-                              </button>
-                            )}
                             {user.isApproved && !user.isSuspended && (
                               <button
                                 onClick={() => handleSuspend(user.id)}
@@ -383,9 +375,9 @@ export default function AdminDashboard() {
                       const markerPos = getMarkerPosition(parcel.coordinates);
                       const boundaryPos = getBoundaryPositions(parcel.boundary);
                       return (
-                        <React.Fragment key={parcel.id}>
+                        <React.Fragment key={`parcel-${parcel.id}`}>
                           {markerPos && (
-                            <Marker position={markerPos}>
+                            <Marker key={`marker-${parcel.id}`} position={markerPos}>
                               <Popup>
                                 <strong>{parcel.title}</strong><br />
                                 {parcel.location}<br />
@@ -395,6 +387,7 @@ export default function AdminDashboard() {
                           )}
                           {boundaryPos && (
                             <Polygon
+                              key={`polygon-${parcel.id}`}
                               positions={boundaryPos}
                               pathOptions={{
                                 color: "#2563eb",
@@ -421,7 +414,7 @@ export default function AdminDashboard() {
     if (!window.confirm("Approve this property listing?")) return;
     try {
       // Approve on backend
-      await api.put(`/properties/${propertyId}/approve`);
+      const res = await api.put(`/properties/${propertyId}/approve`);
       // Update UI: remove from pending, add to approved with both flags true
       setPendingListings(prev => prev.filter(p => p.id !== propertyId));
       setApprovedParcels(prev => {
