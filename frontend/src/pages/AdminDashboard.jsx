@@ -31,12 +31,17 @@ export default function AdminDashboard() {
         const statsRes = await fetch(`${import.meta.env.VITE_API_URL}/admin/stats`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        // FIX: Fetch pending listings where isApproved = false
-        const pendingRes = await api.get('/properties?isApproved=false');
+        // Fetch all properties (including unapproved)
+        const allPropsRes = await api.get('/properties');
         if (!statsRes.ok) throw new Error('Failed to fetch stats');
         const statsData = await statsRes.json();
         setStats(statsData);
-        setPendingListings(pendingRes.data);
+        // Only show pending listings (isApproved === false)
+        setPendingListings(
+          Array.isArray(allPropsRes.data)
+            ? allPropsRes.data.filter(p => !p.isApproved)
+            : []
+        );
       } catch (err) {
         setError(err.message);
       } finally {
@@ -62,8 +67,8 @@ export default function AdminDashboard() {
     const fetchApprovedParcels = async () => {
       setLoadingParcels(true);
       try {
-        const res = await api.get('/properties?isApproved=true');
-        setApprovedParcels(Array.isArray(res.data) ? res.data : []);
+        const res = await api.get('/properties');
+        setApprovedParcels(Array.isArray(res.data) ? res.data.filter(p => p.isApproved) : []);
       } catch {
         setApprovedParcels([]);
       } finally {
@@ -411,10 +416,20 @@ export default function AdminDashboard() {
   );
 
   async function handleApprove(propertyId) {
-    if (window.confirm("Approve this property listing?")) {
+    if (!window.confirm("Approve this property listing?")) return;
+    try {
       await api.put(`/properties/${propertyId}/approve`);
       setPendingListings(prev => prev.filter(p => p.id !== propertyId));
+      // Find the approved property and add to approvedParcels for instant UI update
+      setApprovedParcels(prev => {
+        const approvedProp = pendingListings.find(p => p.id === propertyId);
+        return approvedProp
+          ? [...prev, { ...approvedProp, isApproved: true }]
+          : prev;
+      });
       alert("Property approved!");
+    } catch (err) {
+      alert("Failed to approve property. Please try again.");
     }
   }
 }
