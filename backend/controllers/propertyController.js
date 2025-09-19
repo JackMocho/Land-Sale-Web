@@ -19,6 +19,18 @@ exports.getProperties = async (req, res) => {
       query += ' WHERE p."isApproved" = TRUE AND p."isapproved" = TRUE';
     }
     const { rows } = await pool.query(query, params);
+
+    // Parse documents for each property
+    rows.forEach(property => {
+      if (typeof property.documents === 'string') {
+        try {
+          property.documents = JSON.parse(property.documents);
+        } catch {
+          property.documents = [];
+        }
+      }
+    });
+
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch properties' });
@@ -37,7 +49,17 @@ exports.getPropertyById = async (req, res) => {
       [id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Property not found' });
-    res.json(rows[0]);
+
+    const property = rows[0];
+    if (typeof property.documents === 'string') {
+      try {
+        property.documents = JSON.parse(property.documents);
+      } catch {
+        property.documents = [];
+      }
+    }
+
+    res.json(property);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch property' });
   }
@@ -73,6 +95,16 @@ exports.createProperty = async (req, res) => {
       boundaryData = null;
     }
 
+    // Upload documents and get URLs
+    let documentUrls = [];
+    if (Array.isArray(documents)) {
+      for (const doc of documents) {
+        // doc should be a file path or buffer
+        const result = await uploadDocument(doc);
+        documentUrls.push({ url: result.secure_url });
+      }
+    }
+
     // Log for debugging
     console.log('Create property payload:', {
       sellerId, title, description, price, size, sizeUnit, type,
@@ -88,7 +120,7 @@ exports.createProperty = async (req, res) => {
         sellerId, title, description, price, size, sizeUnit, type,
         county, constituency, location, coordinates,
         JSON.stringify(imagesData), // <-- stringify here
-        JSON.stringify(documentsData), // <-- and here
+        JSON.stringify(documentUrls), // <-- and here
         boundaryData ? JSON.stringify(boundaryData) : null, // <-- and here if not null
         false
       ]

@@ -183,19 +183,23 @@ export default function PropertyDetail() {
             <h2 className="text-xl font-semibold mb-2 text-blue-900">Documents</h2>
             {Array.isArray(property.documents) && property.documents.length > 0 ? (
               <ul className="list-disc ml-6">
-                {property.documents.map((doc, idx) => (
-                  <li key={idx}>
-                    <a
-                      href={doc.url} // Should be the secure_url from Cloudinary
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download // This hints the browser to download
-                      className="text-blue-700 underline hover:text-blue-900"
-                    >
-                      Download Document {idx + 1}
-                    </a>
-                  </li>
-                ))}
+                {property.documents.map((doc, idx) => {
+                  // Support both string and object format
+                  const url = typeof doc === 'string' ? doc : doc.url;
+                  return (
+                    <li key={idx}>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        className="text-blue-700 underline hover:text-blue-900"
+                      >
+                        Download Document {idx + 1}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="text-gray-500">No documents available for this listing.</p>
