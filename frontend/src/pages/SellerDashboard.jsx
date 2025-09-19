@@ -2,11 +2,13 @@ import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import PropertyForm from './PropertyForm'; // Import the form
 
 export default function SellerDashboard() {
   const { user, logout } = useAuth();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false); // Track form visibility
 
   // Fetch seller's properties
   const fetchSellerProperties = async () => {
@@ -26,6 +28,31 @@ export default function SellerDashboard() {
     // eslint-disable-next-line
   }, []);
 
+  // If form is open, show it instead of dashboard
+  if (showForm) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-200 to-gray-100 py-12 relative overflow-x-hidden">
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center opacity-20 pointer-events-none"
+          style={{
+            backgroundImage: "url('/assets/geo8.jpg')",
+            backgroundBlendMode: 'multiply',
+          }}
+          aria-hidden="true"
+        />
+        <div className="relative z-10 container mx-auto px-4">
+          <button
+            onClick={() => setShowForm(false)}
+            className="mb-6 bg-blue-900 text-white px-4 py-2 rounded shadow hover:bg-blue-800"
+          >
+            ← Back to Dashboard
+          </button>
+          <PropertyForm />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-200 to-gray-100 py-12 relative overflow-x-hidden">
       {/* Decorative background image as in Home.jsx */}
@@ -40,12 +67,7 @@ export default function SellerDashboard() {
       <div className="relative z-10 container mx-auto px-4">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
           <h1 className="text-3xl font-bold text-blue-900 drop-shadow">Seller Dashboard</h1>
-          <button
-            onClick={logout}
-            className="text-red-600 hover:underline font-semibold"
-          >
-            Logout
-          </button>
+          
         </div>
         <div className="bg-white p-6 rounded-lg shadow mb-8">
           <h2 className="text-xl font-semibold mb-4 text-blue-900">Your Profile</h2>
@@ -61,17 +83,20 @@ export default function SellerDashboard() {
         <div className="bg-white p-6 rounded-lg shadow mb-12">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
             <h2 className="text-xl font-semibold text-blue-900">Your Land Listings</h2>
-            <Link
-              to="/add-property"
+            <button
+              onClick={() => setShowForm(true)}
               className="bg-blue-700 text-white px-6 py-2 rounded font-semibold hover:bg-blue-800 transition"
             >
               + Add New Property
-            </Link>
+            </button>
           </div>
           {loading ? (
             <p>Loading...</p>
           ) : properties.length === 0 ? (
-            <p className="text-gray-500">You have not listed any properties yet.</p>
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">You have not listed any properties yet.</p>
+              
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
