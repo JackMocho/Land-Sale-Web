@@ -38,7 +38,7 @@ export default function AboutUs() {
               <li>Modern, mobile-friendly design</li>
             </ul>
           </div>
-          <div className="flex flex-col justify-center items-center bg-gradient-to-br from-blue-50 to-blue-600 rounded-2xl shadow p-6">
+          <div className="flex flex-col justify-center items-center bg-gradient-to-br from-blue-200 to-blue-400 rounded-2xl shadow p-6">
             
             <span className="text-xs text-gray-900">Empowering land transactions with technology</span>
           </div>
