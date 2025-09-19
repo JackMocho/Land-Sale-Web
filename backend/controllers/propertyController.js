@@ -1,5 +1,6 @@
 // controllers/propertyController.js
 const pool = require('../config/pg');
+const { uploadDocument } = require('../utils/cloudinary');
 
 // Get all properties (admin can see all, others only approved)
 exports.getProperties = async (req, res) => {
