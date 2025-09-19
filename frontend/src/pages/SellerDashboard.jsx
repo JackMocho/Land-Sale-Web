@@ -1,110 +1,148 @@
-import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../services/api';
 
 export default function SellerDashboard() {
   const { user, logout } = useAuth();
-  const [listings, setListings] = useState([]);
+  const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) return;
-    async function fetchSellerListings() {
-      setLoading(true);
-      try {
-        // Fetch listings for the logged-in seller
-        const res = await api.get(`/properties?sellerid=${user.id}`);
-        // Ensure images is always an array and URLs are absolute
-        const fixedListings = (Array.isArray(res.data) ? res.data : []).map(listing => {
-          let images = [];
-          if (Array.isArray(listing.images)) {
-            images = listing.images;
-          } else if (typeof listing.images === 'string' && listing.images.length > 0) {
-            try {
-              images = JSON.parse(listing.images);
-            } catch {
-              images = [listing.images];
-            }
-          }
-          // Prefix /uploads/ with backend URL
-          const fixedImages = images.map(url =>
-            url && url.startsWith('/uploads/')
-              ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${url}`
-              : url
-          );
-          return { ...listing, images: fixedImages };
-        });
-        setListings(fixedListings);
-      } catch (err) {
-        setListings([]);
-      } finally {
-        setLoading(false);
-      }
+  // Fetch seller's properties
+  const fetchSellerProperties = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/properties?sellerId=${user?.id}`);
+      setProperties(res.data);
+    } catch (err) {
+      setProperties([]);
+    } finally {
+      setLoading(false);
     }
-    fetchSellerListings();
-  }, [user]);
+  };
 
-  if (!user) return <div className="p-8 text-center">Please log in to view your dashboard.</div>;
+  useEffect(() => {
+    fetchSellerProperties();
+    // eslint-disable-next-line
+  }, []);
 
   return (
-    <div className="py-12 bg-gradient-to-tl from-blue-100 to-blue-500 min-h-screen">
-      <div className="container mx-auto px-6 max-w-4xl">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Seller Dashboard</h1>
-          <button onClick={logout} className="text-red-600 hover:underline">Logout</button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-200 to-gray-100 py-12 relative overflow-x-hidden">
+      {/* Decorative background image as in Home.jsx */}
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-20 pointer-events-none"
+        style={{
+          backgroundImage: "url('/assets/geo8.jpg')",
+          backgroundBlendMode: 'multiply',
+        }}
+        aria-hidden="true"
+      />
+      <div className="relative z-10 container mx-auto px-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+          <h1 className="text-3xl font-bold text-blue-900 drop-shadow">Seller Dashboard</h1>
+          <button
+            onClick={logout}
+            className="text-red-600 hover:underline font-semibold"
+          >
+            Logout
+          </button>
         </div>
         <div className="bg-white p-6 rounded-lg shadow mb-8">
-          <h2 className="text-xl font-semibold mb-4">Your Profile</h2>
-          <p><strong>Name:</strong> {user?.name}</p>
-          <p><strong>Email:</strong> {user?.email}</p>
-          <p><strong>Role:</strong> {user?.role}</p>
-          <p><strong>County:</strong> {user?.county}</p>
+          <h2 className="text-xl font-semibold mb-4 text-blue-900">Your Profile</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <p><strong>Name:</strong> {user?.name}</p>
+            <p><strong>Email:</strong> {user?.email}</p>
+            <p><strong>Role:</strong> {user?.role}</p>
+            <p><strong>County:</strong> {user?.county}</p>
+          </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Your Listings</h2>
+
+        {/* Seller's Properties Section */}
+        <div className="bg-white p-6 rounded-lg shadow mb-12">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+            <h2 className="text-xl font-semibold text-blue-900">Your Land Listings</h2>
             <Link
-              to="/list-new"
-              className="bg-blue-900 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
+              to="/add-property"
+              className="bg-blue-700 text-white px-6 py-2 rounded font-semibold hover:bg-blue-800 transition"
             >
-              + New Listing
+              + Add New Property
             </Link>
           </div>
           {loading ? (
-            <p>Loading your listings...</p>
-          ) : listings.length === 0 ? (
-            <p className="text-gray-600">You have not listed any properties yet.</p>
+            <p>Loading...</p>
+          ) : properties.length === 0 ? (
+            <p className="text-gray-500">You have not listed any properties yet.</p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {listings.map(listing => (
-                <div key={listing.id} className="bg-white rounded-lg shadow p-4">
-                  <h2 className="text-xl font-semibold mb-2">{listing.title}</h2>
-                  <p className="text-gray-700 mb-1">{listing.location}, {listing.county}</p>
-                  <p className="text-gray-700 mb-1">KES {listing.price?.toLocaleString()}</p>
-                  <div className="mb-2">
-                    {/* Render first image if available */}
-                    {Array.isArray(listing.images) && listing.images.length > 0 && listing.images[0] && (
-                      <img
-                        src={listing.images[0]}
-                        alt="Preview"
-                        className="w-full h-32 object-cover rounded"
-                      />
-                    )}
-                  </div>
-                  <div className="flex gap-3 mt-2">
-                    <Link
-                      to={`/property/${listing.id}`}
-                      className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                    >
-                      View
-                    </Link>
-                    {/* Add edit/delete buttons if needed */}
-                  </div>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b">
+                    <th className="pb-2">Title</th>
+                    <th className="pb-2">Location</th>
+                    <th className="pb-2">County</th>
+                    <th className="pb-2">Price</th>
+                    <th className="pb-2">Size</th>
+                    <th className="pb-2">Status</th>
+                    <th className="pb-2">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {properties.map(property => (
+                    <tr key={property.id} className="border-b hover:bg-blue-50 transition">
+                      <td className="py-3">{property.title}</td>
+                      <td>{property.location}</td>
+                      <td>{property.county}</td>
+                      <td>{property.price?.toLocaleString()}</td>
+                      <td>{property.size} {property.sizeUnit}</td>
+                      <td>
+                        {property.isApproved
+                          ? <span className="text-green-600 font-semibold">Approved</span>
+                          : <span className="text-yellow-600 font-semibold">Pending</span>
+                        }
+                      </td>
+                      <td>
+                        <Link
+                          to={`/property/${property.id}`}
+                          className="bg-blue-900 text-white px-3 py-1 rounded text-sm hover:bg-blue-800 mr-2"
+                        >
+                          View
+                        </Link>
+                        <Link
+                          to={`/edit-property/${property.id}`}
+                          className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600"
+                        >
+                          Edit
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
+        </div>
+
+        {/* Seller Tips Section */}
+        <div className="bg-gradient-to-br from-blue-900 to-blue-300 text-white rounded-2xl shadow-lg p-8 mb-8 flex flex-col items-center">
+          <h2 className="text-2xl font-bold mb-4 text-center">Tips for Successful Land Sales</h2>
+          <ul className="list-disc text-white text-base mb-4 pl-6 space-y-1">
+            <li>Ensure your property details are accurate and up-to-date.</li>
+            <li>Upload clear photos and documents for faster approval.</li>
+            <li>Respond promptly to buyer inquiries.</li>
+            <li>Be transparent about land ownership and documentation.</li>
+            <li>Consult a licensed surveyor for boundary and title issues.</li>
+          </ul>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="font-semibold">Need help?</span>
+            <a
+              href="https://wa.me/254745420900"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-green-200 hover:text-green-400 font-bold"
+            >
+              WhatsApp: 0745 420 900
+            </a>
+          </div>
         </div>
       </div>
     </div>

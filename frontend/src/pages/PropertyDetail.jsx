@@ -51,8 +51,8 @@ export default function PropertyDetail() {
     fetchProperty();
   }, [id]);
 
-  if (loading) return <div className="p-8">Loading...</div>;
-  if (!property) return <div className="p-8 text-red-600">Property not found.</div>;
+  if (loading) return <div className="p-8 text-center text-blue-900">Loading...</div>;
+  if (!property) return <div className="p-8 text-red-600 text-center">Property not found.</div>;
 
   // Parse coordinates
   let markerPosition = null;
@@ -87,107 +87,120 @@ export default function PropertyDetail() {
   };
 
   return (
-    <div className="py-12 bg-gray-50 min-h-screen">
-      <div className="container mx-auto px-6 max-w-2xl">
-        <h1 className="text-3xl font-bold mb-4">{property.title}</h1>
-        <div className="mb-4 text-gray-700">
-          <p><strong>Description:</strong> {property.description}</p>
-          <p><strong>Price:</strong> KES {property.price?.toLocaleString()}</p>
-          <p><strong>Size:</strong> {property.size} {property.sizeUnit}</p>
-          <p><strong>Type:</strong> {property.type}</p>
-          <p><strong>County:</strong> {property.county}</p>
-          <p><strong>Constituency:</strong> {property.constituency}</p>
-          <p><strong>Location:</strong> {property.location}</p>
-          <p>
-            <strong>Seller Name:</strong> {property.seller_name || 'Not available'}
-          </p>
-          <p>
-            <strong>Seller Phone:</strong> {property.seller_phone || 'Not available'}
-          </p>
-        </div>
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Map</h2>
-          <div className="h-80 w-full rounded-lg overflow-hidden shadow">
-            <MapContainer
-              center={markerPosition || [-1.2833, 36.8167]}
-              zoom={markerPosition ? 14 : 7}
-              style={{ height: '100%', width: '100%' }}
-              scrollWheelZoom={true}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution="&copy; OpenStreetMap contributors"
-              />
-              {markerPosition && <Marker position={markerPosition} />}
-              {boundaryPositions && (
-                <Polygon
-                  positions={boundaryPositions}
-                  pathOptions={{
-                    color: "#2563eb",
-                    fillColor: "#93c5fd",
-                    fillOpacity: 0.4,
-                    weight: 3,
-                  }}
-                />
-              )}
-            </MapContainer>
+    <div className="relative min-h-screen bg-gradient-to-br from-blue-200 to-gray-100 py-12 overflow-x-hidden">
+      {/* Decorative background image as in Home.jsx */}
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-20 pointer-events-none"
+        style={{
+          backgroundImage: "url('/assets/geo8.jpg')",
+          backgroundBlendMode: 'multiply',
+        }}
+        aria-hidden="true"
+      />
+      <div className="relative z-10 container mx-auto px-4 max-w-2xl">
+        <div className="bg-white bg-opacity-95 rounded-3xl shadow-2xl p-6 sm:p-10 mb-8">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-blue-900 mb-4 text-center drop-shadow">
+            {property.title}
+          </h1>
+          <div className="mb-4 text-gray-700 space-y-2">
+            <p><span className="font-semibold text-blue-900">Description:</span> {property.description}</p>
+            <p><span className="font-semibold text-blue-900">Price:</span> <span className="text-green-700">KES {property.price?.toLocaleString()}</span></p>
+            <p><span className="font-semibold text-blue-900">Size:</span> {property.size} {property.sizeUnit}</p>
+            <p><span className="font-semibold text-blue-900">Type:</span> {property.type}</p>
+            <p><span className="font-semibold text-blue-900">County:</span> {property.county}</p>
+            <p><span className="font-semibold text-blue-900">Constituency:</span> {property.constituency}</p>
+            <p><span className="font-semibold text-blue-900">Location:</span> {property.location}</p>
+            <p>
+              <span className="font-semibold text-blue-900">Seller Name:</span> {property.seller_name || 'Not available'}
+            </p>
+            <p>
+              <span className="font-semibold text-blue-900">Seller Phone:</span> {property.seller_phone || 'Not available'}
+            </p>
           </div>
-        </div>
-        <div>
-          <h2 className="text-xl font-semibold mb-2">Photos</h2>
-          <div className="flex flex-col items-center">
-            {(property.images && property.images.length > 0) ? (
-              <div className="relative w-full flex flex-col items-center">
-                <img
-                  src={property.images[currentImage]}
-                  alt={`Preview ${currentImage + 1}`}
-                  className="w-full h-64 object-cover rounded shadow"
-                  onError={e => { e.target.style.display = 'none'; }}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-2 text-blue-900">Map</h2>
+            <div className="h-80 w-full rounded-lg overflow-hidden shadow">
+              <MapContainer
+                center={markerPosition || [-1.2833, 36.8167]}
+                zoom={markerPosition ? 14 : 7}
+                style={{ height: '100%', width: '100%' }}
+                scrollWheelZoom={true}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution="&copy; OpenStreetMap contributors"
                 />
-                <div className="flex justify-between items-center w-full mt-2">
-                  <button
-                    onClick={handlePrevImage}
-                    className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  >
-                    &#8592; Prev
-                  </button>
-                  <span className="text-gray-700 font-semibold">
-                    {currentImage + 1} / {property.images.length}
-                  </span>
-                  <button
-                    onClick={handleNextImage}
-                    className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  >
-                    Next &#8594;
-                  </button>
+                {markerPosition && <Marker position={markerPosition} />}
+                {boundaryPositions && (
+                  <Polygon
+                    positions={boundaryPositions}
+                    pathOptions={{
+                      color: "#2563eb",
+                      fillColor: "#93c5fd",
+                      fillOpacity: 0.4,
+                      weight: 3,
+                    }}
+                  />
+                )}
+              </MapContainer>
+            </div>
+          </div>
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-2 text-blue-900">Photos</h2>
+            <div className="flex flex-col items-center">
+              {(property.images && property.images.length > 0) ? (
+                <div className="relative w-full flex flex-col items-center">
+                  <img
+                    src={property.images[currentImage]}
+                    alt={`Preview ${currentImage + 1}`}
+                    className="w-full h-64 object-cover rounded shadow"
+                    onError={e => { e.target.style.display = 'none'; }}
+                  />
+                  <div className="flex justify-between items-center w-full mt-2">
+                    <button
+                      onClick={handlePrevImage}
+                      className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    >
+                      &#8592; Prev
+                    </button>
+                    <span className="text-gray-700 font-semibold">
+                      {currentImage + 1} / {property.images.length}
+                    </span>
+                    <button
+                      onClick={handleNextImage}
+                      className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    >
+                      Next &#8594;
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <p className="text-gray-500">No photos available for this listing.</p>
+              )}
+            </div>
+          </div>
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold mb-2 text-blue-900">Documents</h2>
+            {Array.isArray(property.documents) && property.documents.length > 0 ? (
+              <ul className="list-disc ml-6">
+                {property.documents.map((docUrl, idx) => (
+                  <li key={idx}>
+                    <a
+                      href={docUrl}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-700 underline"
+                    >
+                      Download Document {idx + 1}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             ) : (
-              <p className="text-gray-500">No photos available for this listing.</p>
+              <p className="text-gray-500">No documents available for this listing.</p>
             )}
           </div>
-        </div>
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-2">Documents</h2>
-          {Array.isArray(property.documents) && property.documents.length > 0 ? (
-            <ul className="list-disc ml-6">
-              {property.documents.map((docUrl, idx) => (
-                <li key={idx}>
-                  <a
-                    href={docUrl}
-                    download
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-700 underline"
-                  >
-                    Download Document {idx + 1}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-500">No documents available for this listing.</p>
-          )}
         </div>
       </div>
     </div>

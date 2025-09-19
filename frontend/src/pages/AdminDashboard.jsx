@@ -138,14 +138,23 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="py-12 bg-gray-50">
-      <div className="container mx-auto px-6">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <button onClick={logout} className="text-red-600 hover:underline">Logout</button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-200 to-gray-100 py-12 relative overflow-x-hidden">
+      {/* Decorative background image as in Home.jsx */}
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-20 pointer-events-none"
+        style={{
+          backgroundImage: "url('/assets/geo8.jpg')",
+          backgroundBlendMode: 'multiply',
+        }}
+        aria-hidden="true"
+      />
+      <div className="relative z-10 container mx-auto px-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+          <h1 className="text-3xl font-bold text-blue-900 drop-shadow">Admin Dashboard</h1>
+          <button onClick={logout} className="text-red-600 hover:underline font-semibold"></button>
         </div>
         {loadingStats ? (
-          <div>Loading stats...</div>
+          <div className="text-center text-blue-700 font-semibold">Loading stats...</div>
         ) : error ? (
           <div className="bg-red-100 text-red-700 p-3 rounded mb-6">{error}</div>
         ) : (
@@ -153,76 +162,81 @@ export default function AdminDashboard() {
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               {stats && [
-                { label: "Total Users", value: stats.users },
-                { label: "Total Properties", value: stats.properties },
-                { label: "Pending Approvals", value: stats.pending },
-                { label: "Total Inquiries", value: stats.inquiries }
+                { label: "Total Users", value: stats.users, color: "from-blue-500 to-blue-300" },
+                { label: "Total Properties", value: stats.properties, color: "from-green-500 to-green-300" },
+                { label: "Pending Approvals", value: stats.pending, color: "from-yellow-500 to-yellow-300" },
+                { label: "Total Inquiries", value: stats.inquiries, color: "from-purple-500 to-purple-300" }
               ].map((stat, i) => (
-                <div key={i} className="bg-white p-6 rounded-lg shadow text-center">
-                  <h3 className="text-lg text-gray-600">{stat.label}</h3>
-                  <p className="text-2xl font-bold">{stat.value}</p>
+                <div
+                  key={i}
+                  className={`bg-gradient-to-br ${stat.color} p-6 rounded-xl shadow text-center text-white`}
+                >
+                  <h3 className="text-lg">{stat.label}</h3>
+                  <p className="text-3xl font-extrabold drop-shadow">{stat.value}</p>
                 </div>
               ))}
             </div>
 
             {/* Pending Listings */}
-            <div className="bg-white p-6 rounded-lg shadow mb-8">
-              <h2 className="text-xl font-semibold mb-4">Listings Awaiting Approval</h2>
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2">Title</th>
-                    <th className="text-left py-2">Location</th>
-                    <th className="text-left py-2">Price</th>
-                    <th className="text-left py-2">Owner</th>
-                    <th className="text-left py-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingListings.map(p => (
-                    <tr key={p.id} className="border-b">
-                      <td className="py-3">{p.title}</td>
-                      <td>{p.location}, {p.county}</td>
-                      <td>KES {p.price.toLocaleString()}</td>
-                      <td>{p.user_name}</td>
-                      <td>
-                        <Link to={`/property/${p.id}`} className="text-blue-900 hover:underline mr-4">View</Link>
-                        <button 
-                          onClick={() => handleApprove(p.id)}
-                          className="text-green-600 hover:underline"
-                        >
-                          Approve
-                        </button>
-                      </td>
+            <div className="bg-white/90 p-6 rounded-2xl shadow-lg mb-8">
+              <h2 className="text-xl font-bold mb-4 text-blue-900">Listings Awaiting Approval</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="py-2">Title</th>
+                      <th className="py-2">Location</th>
+                      <th className="py-2">Price</th>
+                      <th className="py-2">Owner</th>
+                      <th className="py-2">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {pendingListings.map(p => (
+                      <tr key={p.id} className="border-b hover:bg-blue-50 transition">
+                        <td className="py-3">{p.title}</td>
+                        <td>{p.location}, {p.county}</td>
+                        <td>KES {p.price.toLocaleString()}</td>
+                        <td>{p.user_name}</td>
+                        <td>
+                          <Link to={`/property/${p.id}`} className="bg-blue-900 text-white px-3 py-1 rounded text-sm hover:bg-blue-800 mr-2">View</Link>
+                          <button 
+                            onClick={() => handleApprove(p.id)}
+                            className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                          >
+                            Approve
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Total Users */}
-            <div className="bg-white p-6 rounded-lg shadow mb-8">
-              <h2 className="text-xl font-semibold mb-4">Total Users: {users.length}</h2>
+            <div className="bg-white/90 p-6 rounded-2xl shadow-lg mb-8">
+              <h2 className="text-xl font-bold mb-4 text-blue-900">Total Users: {users.length}</h2>
               {loadingUsers ? (
-                <p>Loading users...</p>
+                <p className="text-blue-700">Loading users...</p>
               ) : users.length === 0 ? (
-                <p>No users found.</p>
+                <p className="text-gray-500">No users found.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-100">
+                    <thead className="bg-blue-50">
                       <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Name</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Email</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Phone</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Role</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">County</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Name</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Email</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Phone</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Role</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">County</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {users.map(user => (
-                        <tr key={user.id} className="hover:bg-gray-50">
+                        <tr key={user.id} className="hover:bg-blue-50">
                           <td className="px-4 py-2">{user.name}</td>
                           <td className="px-4 py-2">{user.email}</td>
                           <td className="px-4 py-2">{user.phone || '-'}</td>
@@ -232,7 +246,8 @@ export default function AdminDashboard() {
                             {user.isApproved && !user.isSuspended && (
                               <button
                                 onClick={() => handleSuspend(user.id)}
-                                className="bg-yellow-500 text-white px-2 py-1 rounded text-xs hover:bg-yellow-600"
+                                className="bg-yellow-400 text-blue-900 px-3 py-1 rounded-lg text-sm font-bold shadow hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all duration-150 border border-yellow-500"
+                                style={{ minWidth: 90, letterSpacing: '0.03em' }}
                               >
                                 Suspend
                               </button>
@@ -253,28 +268,28 @@ export default function AdminDashboard() {
             </div>
 
             {/* Suspended Users */}
-            <div className="bg-white p-6 rounded-lg shadow mb-8">
-              <h2 className="text-xl font-semibold mb-4">Suspended Users: {suspendedUsers.length}</h2>
+            <div className="bg-white/90 p-6 rounded-2xl shadow-lg mb-8">
+              <h2 className="text-xl font-bold mb-4 text-blue-900">Suspended Users: {suspendedUsers.length}</h2>
               {loadingUsers ? (
-                <p>Loading users...</p>
+                <p className="text-blue-700">Loading users...</p>
               ) : suspendedUsers.length === 0 ? (
-                <p>No suspended users found.</p>
+                <p className="text-gray-500">No suspended users found.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-100">
+                    <thead className="bg-blue-50">
                       <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Name</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Email</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Phone</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Role</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">County</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Name</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Email</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Phone</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Role</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">County</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {suspendedUsers.map(user => (
-                        <tr key={user.id} className="hover:bg-gray-50">
+                        <tr key={user.id} className="hover:bg-blue-50">
                           <td className="px-4 py-2">{user.name}</td>
                           <td className="px-4 py-2">{user.email}</td>
                           <td className="px-4 py-2">{user.phone || '-'}</td>
@@ -305,27 +320,27 @@ export default function AdminDashboard() {
             </div>
 
             {/* Approved Parcels Table */}
-            <div className="bg-white p-6 rounded-lg shadow mb-8">
-              <h2 className="text-xl font-semibold mb-4">All Approved Land Parcels</h2>
+            <div className="bg-white/90 p-6 rounded-2xl shadow-lg mb-8">
+              <h2 className="text-xl font-bold mb-4 text-blue-900">All Approved Land Parcels</h2>
               {loadingParcels ? (
-                <p>Loading parcels...</p>
+                <p className="text-blue-700">Loading parcels...</p>
               ) : approvedParcels.length === 0 ? (
-                <p>No approved parcels found.</p>
+                <p className="text-gray-500">No approved parcels found.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-100">
+                    <thead className="bg-blue-50">
                       <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Title</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Location</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">County</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Price</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Title</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Location</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">County</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Price</th>
+                        <th className="px-4 py-2 text-left text-xs font-bold text-blue-900 uppercase">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {approvedParcels.map(parcel => (
-                        <tr key={parcel.id} className="hover:bg-gray-50">
+                        <tr key={parcel.id} className="hover:bg-blue-50">
                           <td className="px-4 py-2">{parcel.title}</td>
                           <td className="px-4 py-2">{parcel.location}</td>
                           <td className="px-4 py-2">{parcel.county}</td>
@@ -353,14 +368,14 @@ export default function AdminDashboard() {
             </div>
 
             {/* Approved Parcels Map */}
-            <div className="bg-white p-6 rounded-lg shadow mb-8">
-              <h2 className="text-xl font-semibold mb-4">Approved Land Parcels Map</h2>
+            <div className="bg-white/90 p-6 rounded-2xl shadow-lg mb-8">
+              <h2 className="text-xl font-bold mb-4 text-blue-900">Approved Land Parcels Map</h2>
               {loadingParcels ? (
-                <p>Loading map...</p>
+                <p className="text-blue-700">Loading map...</p>
               ) : approvedParcels.length === 0 ? (
-                <p>No approved parcels to display.</p>
+                <p className="text-gray-500">No approved parcels to display.</p>
               ) : (
-                <div className="w-full h-96 rounded overflow-hidden">
+                <div className="w-full h-96 rounded-xl overflow-hidden border-2 border-blue-200 shadow">
                   <MapContainer
                     center={[-1.2833, 36.8167]}
                     zoom={7}
