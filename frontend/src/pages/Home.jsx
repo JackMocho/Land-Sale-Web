@@ -23,9 +23,6 @@ export default function Home() {
   const { user } = useAuth();
   const [approvedProperties, setApprovedProperties] = useState([]);
   const [stats, setStats] = useState({ users: 0, listings: 0 });
-  const [searchCounty, setSearchCounty] = useState('');
-  const [searchConstituency, setSearchConstituency] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentGallery, setCurrentGallery] = useState(0);
 
@@ -71,24 +68,6 @@ export default function Home() {
     }
     fetchFeatured();
   }, []);
-
-  // Search handler
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const params = [];
-      if (searchCounty) params.push(`county=${encodeURIComponent(searchCounty)}`);
-      if (searchConstituency) params.push(`constituency=${encodeURIComponent(searchConstituency)}`);
-      params.push('isApproved=true');
-      const res = await api.get(`/properties?${params.join('&')}`);
-      setSearchResults(Array.isArray(res.data) ? res.data : []);
-    } catch {
-      setSearchResults([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Kenyan land law quotations
   const statuteQuotes = [
@@ -147,54 +126,8 @@ export default function Home() {
             >
               List Your Land Now
             </Link>
-            <form
-              onSubmit={handleSearch}
-              className="w-full bg-white bg-opacity-90 rounded-lg shadow-md p-4 flex flex-col sm:flex-row gap-4 mt-2"
-            >
-              <select
-                className="flex-1 border border-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                value={searchCounty}
-                onChange={e => {
-                  setSearchCounty(e.target.value);
-                  setSearchConstituency('');
-                }}
-              >
-                <option value="">Select County</option>
-                {kenyaCounties.map(county => (
-                  <option key={county} value={county}>{county}</option>
-                ))}
-              </select>
-              <select
-                className="flex-1 border border-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                value={searchConstituency}
-                onChange={e => setSearchConstituency(e.target.value)}
-                disabled={!searchCounty}
-              >
-                <option value="">Select Constituency</option>
-                {searchCounty && constituenciesByCounty[searchCounty]?.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-              <button
-                type="submit"
-                className="bg-blue-700 text-white px-6 py-2 rounded font-semibold hover:bg-blue-800 transition"
-                disabled={loading}
-              >
-                {loading ? "Searching..." : "Search"}
-              </button>
-            </form>
           </div>
-          <div className="md:w-1/2 flex justify-center">
-            {/* Main survey image (geo8) */}
-            <img
-              src="/assets/geo8.jpg"
-              alt="Survey Tools"
-              className="rounded-2xl shadow-2xl w-full max-w-md opacity-95 transform hover:scale-105 transition-transform duration-500 border-4 border-blue-200"
-              style={{ boxShadow: '0 8px 32px rgba(59,130,246,0.15)' }}
-              loading="eager"
-              fetchpriority="high"
-            />
-          </div>
+          
         </section>
 
         {/* Survey Tools Gallery/Slider */}
@@ -209,7 +142,7 @@ export default function Home() {
                 style={{ borderRadius: '1rem' }}
               />
               <div className="absolute bottom-2 right-2 bg-white bg-opacity-70 rounded px-3 py-1 text-blue-900 text-xs">
-                {`Survey Tool Image ${currentGallery + 1}`}
+                {`Image ${currentGallery + 1}`}
               </div>
             </div>
             <div className="flex gap-2">
@@ -227,7 +160,7 @@ export default function Home() {
 
         {/* Statute Quotations */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-blue-900 mb-4 text-center">Quotations from Kenyan Land Statutes</h2>
+          <h2 className="text-xl font-bold text-blue-900 mb-4 text-center">Kenyan Land Laws and Statutes</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {statuteQuotes.map((q, idx) => (
               <blockquote
@@ -245,7 +178,7 @@ export default function Home() {
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-blue-900 mb-6 text-center">Featured Land Parcels</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {(searchResults.length > 0 ? searchResults : approvedProperties).map(listing => (
+            {approvedProperties.map(listing => (
               <div
                 key={listing.id}
                 className="bg-white rounded-xl shadow-lg p-6 flex flex-col transition hover:scale-105 hover:shadow-2xl opacity-95"
@@ -289,7 +222,7 @@ export default function Home() {
                 )}
               </div>
             ))}
-            {(searchResults.length === 0 && approvedProperties.length === 0) && (
+            {approvedProperties.length === 0 && (
               <div className="col-span-full text-center text-gray-500 py-12">
                 No approved land parcels found.
               </div>
