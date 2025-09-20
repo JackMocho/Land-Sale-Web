@@ -121,7 +121,7 @@ export default function BuyerDashboard() {
                     <th className="pb-2 hidden sm:table-cell">Location</th>
                     <th className="pb-2 hidden sm:table-cell">County</th>
                     <th className="pb-2">Price</th>
-                    <th className="pb-2">Size</th>
+                    <th className="pb-2 hidden sm:table-cell">Size</th>
                     <th className="pb-2 hidden sm:table-cell">Seller Name</th>
                     <th className="pb-2 hidden sm:table-cell">Seller Phone</th>
                     <th className="pb-2">Actions</th>
@@ -134,7 +134,7 @@ export default function BuyerDashboard() {
                       <td className="hidden sm:table-cell">{property.location}</td>
                       <td className="hidden sm:table-cell">{property.county}</td>
                       <td>{property.price?.toLocaleString()}</td>
-                      <td>{property.size} {property.sizeUnit}</td>
+                      <td className="hidden sm:table-cell">{property.size} {property.sizeUnit}</td>
                       <td className="hidden sm:table-cell">{property.seller_name || 'N/A'}</td>
                       <td className="hidden sm:table-cell">{property.seller_phone || 'N/A'}</td>
                       <td>

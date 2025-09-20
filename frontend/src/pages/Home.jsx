@@ -110,10 +110,10 @@ export default function Home() {
         </div>
 
         {/* Modern Call to Action & About Us */}
-        <section className="flex flex-col-reverse md:flex-row items-center justify-between mb-8 md:mb-12 gap-6 md:gap-8">
+        <section className="flex flex-col md:flex-row items-center justify-between mb-8 md:mb-12 gap-6 md:gap-8">
           <div className="md:w-1/2 flex flex-col items-start w-full">
             {/* Survey Tools Gallery/Slider as background for the headline */}
-            <div className="relative w-full h-40 sm:h-56 md:h-64 mb-4 rounded-2xl overflow-hidden shadow-lg">
+            <div className="relative w-full h-40 xs:h-48 sm:h-56 md:h-64 mb-4 rounded-2xl overflow-hidden shadow-lg">
               <img
                 src={surveyImages[currentGallery]}
                 alt={`Survey Tool ${currentGallery + 1}`}
@@ -121,7 +121,7 @@ export default function Home() {
                 style={{ borderRadius: '1rem' }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-blue-900/70 via-transparent to-transparent rounded-2xl"></div>
-              <div className="absolute bottom-3 left-3 flex gap-2">
+              <div className="absolute bottom-3 left-3 right-3 flex gap-2">
                 {surveyImages.map((img, idx) => (
                   <button
                     key={img}
@@ -132,7 +132,7 @@ export default function Home() {
                 ))}
               </div>
               <h1
-                className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-white text-xl xs:text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg px-2"
+                className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-white text-lg xs:text-xl sm:text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg px-2"
                 style={{ textShadow: '0 2px 8px rgba(59,130,246,0.25)' }}
               >
                 Find Your Perfect Land Parcel in Kenya
@@ -147,7 +147,7 @@ export default function Home() {
                 className="bg-blue-900 text-white font-bold py-2 px-6 sm:py-3 sm:px-8 rounded-lg shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105 hover:-translate-y-1 text-base sm:text-lg mb-4 animate-pulse w-full sm:w-auto text-center"
                 style={{ animationDuration: '2s' }}
               >
-                Find or List  Your Dream Land Now
+                Find or List Your Dream Land Now
               </Link>
             </section>
           </div>
