@@ -118,12 +118,12 @@ export default function BuyerDashboard() {
                 <thead>
                   <tr className="border-b">
                     <th className="pb-2">Title</th>
-                    <th className="pb-2">Location</th>
-                    <th className="pb-2">County</th>
+                    <th className="pb-2 hidden sm:table-cell">Location</th>
+                    <th className="pb-2 hidden sm:table-cell">County</th>
                     <th className="pb-2">Price</th>
                     <th className="pb-2">Size</th>
-                    <th className="pb-2">Seller Name</th>
-                    <th className="pb-2">Seller Phone</th>
+                    <th className="pb-2 hidden sm:table-cell">Seller Name</th>
+                    <th className="pb-2 hidden sm:table-cell">Seller Phone</th>
                     <th className="pb-2">Actions</th>
                   </tr>
                 </thead>
@@ -131,12 +131,12 @@ export default function BuyerDashboard() {
                   {properties.map(property => (
                     <tr key={property.id} className="border-b hover:bg-blue-50 transition">
                       <td className="py-3">{property.title}</td>
-                      <td>{property.location}</td>
-                      <td>{property.county}</td>
+                      <td className="hidden sm:table-cell">{property.location}</td>
+                      <td className="hidden sm:table-cell">{property.county}</td>
                       <td>{property.price?.toLocaleString()}</td>
                       <td>{property.size} {property.sizeUnit}</td>
-                      <td>{property.seller_name || 'N/A'}</td>
-                      <td>{property.seller_phone || 'N/A'}</td>
+                      <td className="hidden sm:table-cell">{property.seller_name || 'N/A'}</td>
+                      <td className="hidden sm:table-cell">{property.seller_phone || 'N/A'}</td>
                       <td>
                         <Link
                           to={`/property/${property.id}`}
