@@ -2,19 +2,20 @@ import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
-import PropertyForm from './PropertyForm'; // Import the form
+import PropertyForm from './PropertyForm';
 
 export default function SellerDashboard() {
   const { user, logout } = useAuth();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false); // Track form visibility
+  const [showForm, setShowForm] = useState(false);
 
-  // Fetch seller's properties
+  // Fetch only properties listed by this seller
   const fetchSellerProperties = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/properties?sellerId=${user?.id}`);
+      // Use lowercase 'sellerid' to match backend query param
+      const res = await api.get(`/properties?sellerid=${user?.id}`);
       setProperties(res.data);
     } catch (err) {
       setProperties([]);
@@ -24,11 +25,10 @@ export default function SellerDashboard() {
   };
 
   useEffect(() => {
-    fetchSellerProperties();
+    if (user?.id) fetchSellerProperties();
     // eslint-disable-next-line
-  }, []);
+  }, [user?.id]);
 
-  // If form is open, show it instead of dashboard
   if (showForm) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-200 to-gray-100 py-12 relative overflow-x-hidden">
@@ -55,7 +55,6 @@ export default function SellerDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-200 to-gray-100 py-12 relative overflow-x-hidden">
-      {/* Decorative background image as in Home.jsx */}
       <div
         className="absolute inset-0 z-0 bg-cover bg-center opacity-20 pointer-events-none"
         style={{
@@ -67,7 +66,6 @@ export default function SellerDashboard() {
       <div className="relative z-10 container mx-auto px-4">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
           <h1 className="text-3xl font-bold text-blue-900 drop-shadow">Seller Dashboard</h1>
-          
         </div>
         <div className="bg-white p-6 rounded-lg shadow mb-8">
           <h2 className="text-xl font-semibold mb-4 text-blue-900">Your Profile</h2>
@@ -95,7 +93,6 @@ export default function SellerDashboard() {
           ) : properties.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500 mb-4">You have not listed any properties yet.</p>
-              
             </div>
           ) : (
             <div className="overflow-x-auto">
